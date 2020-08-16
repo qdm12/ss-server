@@ -57,17 +57,22 @@ func _main(ctx context.Context, environment []string) int { //nolint:unparam
 
 	ctx, cancel := context.WithCancel(ctx)
 
-	serverExited := make(chan struct{})
+	errorCh := make(chan error)
 	go func() {
-		server.Listen(ctx, "0.0.0.0:"+port)
-		close(serverExited)
+		errorCh <- server.Listen(ctx, "0.0.0.0:"+port)
 	}()
 
 	OSSignals := make(chan os.Signal, 1)
 	signal.Notify(OSSignals, syscall.SIGINT, syscall.SIGTERM)
-	signal := <-OSSignals
-	logger.Info("Received OS signal " + signal.String())
-	cancel()
-	<-serverExited
+	select {
+	case err := <-errorCh:
+		logger.Error(err.Error())
+		cancel()
+	case signal := <-OSSignals:
+		logger.Info("Received OS signal " + signal.String())
+		cancel()
+		<-errorCh // wait for exit
+	}
+	close(errorCh)
 	return 1
 }

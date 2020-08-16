@@ -16,7 +16,10 @@ func main() {
 		os.Exit(1)
 	}
 	ctx := context.Background()
-	server.Listen(ctx, "0.0.0.0:8388") // blocking call, can be run in a goroutine
+	err = server.Listen(ctx, "0.0.0.0:8388") // blocking call, can be run in a goroutine
+	if err != nil {
+		logger.Error(err.Error())
+	}
 }
 
 type logger struct{}

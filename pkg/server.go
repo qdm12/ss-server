@@ -13,7 +13,7 @@ import (
 //go:generate mockgen -destination=mock_$GOPACKAGE/$GOFILE.go . Server
 
 type Server interface {
-	Listen(ctx context.Context, address string)
+	Listen(ctx context.Context, address string) (err error)
 }
 
 type server struct {
@@ -40,7 +40,7 @@ func NewServer(cipherName, password string, logger log.Logger) (s Server, err er
 	}, nil
 }
 
-func (s *server) Listen(ctx context.Context, address string) {
+func (s *server) Listen(ctx context.Context, address string) (err error) {
 	ctx, cancel := context.WithCancel(ctx)
 
 	serversRunning := map[string]struct{}{
@@ -50,22 +50,28 @@ func (s *server) Listen(ctx context.Context, address string) {
 	exited := make(chan string)
 
 	// Launch TCP and UDP servers
+	errorCh := make(chan error)
 	go func() {
-		if err := s.udpServer.Listen(ctx, address); err != nil {
-			s.logger.Error(fmt.Sprintf("UDP server exited: %s", err))
+		udpErr := s.udpServer.Listen(ctx, address)
+		if ctx.Err() == nil && udpErr != nil {
+			errorCh <- fmt.Errorf("UDP server crashed: %w", udpErr)
 		}
-		cancel()
 		exited <- "UDP server"
 	}()
 	go func() {
-		if err := s.tcpServer.Listen(ctx, address); err != nil {
-			s.logger.Error(fmt.Sprintf("TCP server exited: %s", err))
+		tcpErr := s.tcpServer.Listen(ctx, address)
+		if ctx.Err() == nil && tcpErr != nil {
+			errorCh <- fmt.Errorf("TCP server crashed: %w", tcpErr)
 		}
-		cancel()
 		exited <- "TCP server"
 	}()
 
-	<-ctx.Done()
+	select {
+	case err = <-errorCh: // unexpected error
+	case <-ctx.Done(): // parent canceled on us
+	}
+	cancel() // stop the other server if an error occurred
+	close(errorCh)
 
 	const shutdownGracePeriod = 500 * time.Millisecond
 	timeoutCtx, timeoutCancel := context.WithTimeout(context.Background(), shutdownGracePeriod)
@@ -74,13 +80,14 @@ func (s *server) Listen(ctx context.Context, address string) {
 	for len(serversRunning) > 0 {
 		select {
 		case serverExited := <-exited:
-			s.logger.Info(fmt.Sprintf("%s exited successfully", serverExited))
+			s.logger.Info(fmt.Sprintf("%s exited", serverExited))
 			delete(serversRunning, serverExited)
 		case <-timeoutCtx.Done():
 			for serverNotExited := range serversRunning {
 				s.logger.Error(fmt.Sprintf("%s did not exit during the %s shutdown grace period", serverNotExited, shutdownGracePeriod))
 			}
-			return
+			return err
 		}
 	}
+	return err
 }

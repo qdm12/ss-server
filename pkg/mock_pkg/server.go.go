@@ -34,9 +34,11 @@ func (m *MockServer) EXPECT() *MockServerMockRecorder {
 }
 
 // Listen mocks base method
-func (m *MockServer) Listen(arg0 context.Context, arg1 string) {
+func (m *MockServer) Listen(arg0 context.Context, arg1 string) error {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "Listen", arg0, arg1)
+	ret := m.ctrl.Call(m, "Listen", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // Listen indicates an expected call of Listen
