@@ -10,6 +10,8 @@ import (
 	"github.com/qdm12/ss-server/pkg/udp"
 )
 
+//go:generate mockgen -destination=mock_$GOPACKAGE/$GOFILE.go . Server
+
 type Server interface {
 	Listen(ctx context.Context, address string)
 }
