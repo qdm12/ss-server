@@ -1,5 +1,5 @@
 {
-    "name": "pia-dev",
+    "name": "ss-server-dev",
     "dockerComposeFile": [
         "docker-compose.yml"
     ],
