@@ -31,10 +31,10 @@ func relay(left, right net.Conn, timeNow func() time.Time) (err error) {
 
 	// Collect eventual errors
 	for i := 0; i < 2; i++ {
-		err := <-errors
-		if err != nil {
-			return err
+		copyErr := <-errors
+		if copyErr != nil {
+			err = copyErr
 		}
 	}
-	return nil
+	return err
 }
