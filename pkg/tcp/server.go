@@ -3,6 +3,8 @@ package tcp
 import (
 	"context"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"net"
 	"time"
 
@@ -74,11 +76,14 @@ func (s *server) Listen(ctx context.Context, address string) (err error) {
 
 func (s *server) handleConnection(connection net.Conn) {
 	defer connection.Close()
-	connection = s.tcpStreamCipher.Shadow(connection)
+	shadowedConnection := s.tcpStreamCipher.Shadow(connection)
 
-	targetAddress, err := socks.ReadAddress(connection)
+	targetAddress, err := socks.ReadAddress(shadowedConnection)
 	if err != nil {
 		s.logger.Error("cannot obtain target address: " + err.Error())
+		if _, err := io.Copy(ioutil.Discard, connection); err != nil {
+			s.logger.Error(err.Error())
+		}
 		return
 	}
 
@@ -99,7 +104,7 @@ func (s *server) handleConnection(connection net.Conn) {
 	}
 
 	s.logger.Info(fmt.Sprintf("TCP proxying %s to %s", connection.RemoteAddr(), targetAddress))
-	if err := relay(connection, rightConnection, s.timeNow); err != nil {
+	if err := relay(shadowedConnection, rightConnection, s.timeNow); err != nil {
 		if err, ok := err.(net.Error); ok && err.Timeout() {
 			s.logger.Debug("TCP relay error: " + err.Error())
 			return // ignore i/o timeout
