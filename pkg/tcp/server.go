@@ -77,6 +77,7 @@ func (s *server) Listen(ctx context.Context, address string) (err error) {
 func (s *server) handleConnection(connection net.Conn) {
 	defer connection.Close()
 	shadowedConnection := s.tcpStreamCipher.Shadow(connection)
+	defer shadowedConnection.Close()
 
 	targetAddress, err := socks.ReadAddress(shadowedConnection)
 	if err != nil {
