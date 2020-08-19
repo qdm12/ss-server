@@ -2,6 +2,20 @@
 
 Focuses on a Dockerized Shadowsocks server as well as giving an easy to use Go API to run a Shadowsocks server.
 
+❓ Question, suggestion, request? ➡️ [Create an issue!](https://github.com/qdm12/ss-server/issues/new)
+
+[![Build status](https://github.com/qdm12/ss-server/workflows/Buildx%20latest/badge.svg)](https://github.com/qdm12/ss-server/actions?query=workflow%3A%22Buildx+latest%22)
+[![Docker Pulls](https://img.shields.io/docker/pulls/qmcgaw/ss-server.svg)](https://hub.docker.com/r/qmcgaw/ss-server)
+[![Docker Stars](https://img.shields.io/docker/stars/qmcgaw/ss-server.svg)](https://hub.docker.com/r/qmcgaw/ss-server)
+
+[![GitHub last commit](https://img.shields.io/github/last-commit/qdm12/ss-server.svg)](https://github.com/qdm12/ss-server/issues)
+[![GitHub commit activity](https://img.shields.io/github/commit-activity/y/qdm12/ss-server.svg)](https://github.com/qdm12/ss-server/issues)
+[![GitHub issues](https://img.shields.io/github/issues/qdm12/ss-server.svg)](https://github.com/qdm12/ss-server/issues)
+
+[![Image size](https://images.microbadger.com/badges/image/qmcgaw/ss-server.svg)](https://microbadger.com/images/qmcgaw/ss-server)
+[![Image version](https://images.microbadger.com/badges/version/qmcgaw/ss-server.svg)](https://microbadger.com/images/qmcgaw/ss-server)
+[![Join Slack channel](https://img.shields.io/badge/slack-@qdm12-yellow.svg?logo=slack)](https://join.slack.com/t/qdm12/shared_invite/enQtOTE0NjcxNTM1ODc5LTYyZmVlOTM3MGI4ZWU0YmJkMjUxNmQ4ODQ2OTAwYzMxMTlhY2Q1MWQyOWUyNjc2ODliNjFjMDUxNWNmNzk5MDk)
+
 ## Docker
 
 The Docker image is:
@@ -123,10 +137,15 @@ func Test(t *testing.T) {
 }
 ```
 
+## On demand
+
+- More CPU architectures, for example `s390x`
+- SIP003 plugins
+
 ## TODOS
 
-- Microbadger
-- Readme badges and icon
+- Support hex raw keys instead of passwords
+- Readme svg icon
+- Entrypoint message
 - Prometheus stats
-- Plugins (on demand)
 - Docker healthcheck + healthcheck endpoint (i.e. for K8s)
