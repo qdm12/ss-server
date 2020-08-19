@@ -12,4 +12,8 @@ services:
       - SYS_PTRACE
     security_opt:
       - seccomp:unconfined
+    ports:
+      - 6060:6060/tcp
+      - 8388:8388/tcp
+      - 8388:8388/udp
     entrypoint: zsh -c "while sleep 1000; do :; done"
