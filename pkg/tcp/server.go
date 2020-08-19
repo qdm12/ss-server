@@ -94,15 +94,6 @@ func (s *server) handleConnection(connection net.Conn) {
 		return
 	}
 	defer rightConnection.Close()
-	rightTCPConnection, ok := rightConnection.(*net.TCPConn)
-	if !ok {
-		s.logger.Error(fmt.Sprintf("right connection is not TCP: %s", rightConnection))
-		return
-	}
-	if err := rightTCPConnection.SetKeepAlive(true); err != nil {
-		s.logger.Error("cannot set keep-alive for 'right' TCP connection: " + err.Error())
-		return
-	}
 
 	s.logger.Info(fmt.Sprintf("TCP proxying %s to %s", connection.RemoteAddr(), targetAddress))
 	if err := relay(shadowedConnection, rightConnection, s.timeNow); err != nil {
