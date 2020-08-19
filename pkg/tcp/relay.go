@@ -13,17 +13,12 @@ func relay(left, right net.Conn, timeNow func() time.Time) (err error) {
 
 	copyFn := func(a, b net.Conn, errors chan error) {
 		_, copyErr := io.Copy(a, b)
-		// wake up the other goroutine blocking on right
-		if err := right.SetDeadline(timeNow()); err != nil {
+		// wake up the other goroutine blocking on side a
+		if err := a.SetDeadline(timeNow()); err != nil {
 			errors <- err
-			return
+		} else {
+			errors <- copyErr
 		}
-		// wake up the other goroutine blocking on left
-		if err := left.SetDeadline(timeNow()); err != nil {
-			errors <- err
-			return
-		}
-		errors <- copyErr
 	}
 
 	go copyFn(right, left, errors)
