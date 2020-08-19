@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"github.com/qdm12/ss-server/internal/log"
+	"github.com/qdm12/ss-server/internal/profiling"
 	"github.com/qdm12/ss-server/pkg"
 )
 
@@ -30,6 +31,7 @@ func _main(ctx context.Context, environment []string) int { //nolint:unparam
 	password := "password"
 	port := "8388"
 	logLevel := "INFO"
+	doProfiling := false
 	for _, envVariable := range environment {
 		slice := strings.Split(envVariable, "=")
 		key, value := slice[0], slice[1]
@@ -42,6 +44,10 @@ func _main(ctx context.Context, environment []string) int { //nolint:unparam
 			cipherName = value
 		case "LOG_LEVEL":
 			logLevel = strings.ToUpper(value)
+		case "PROFILING":
+			if strings.ToLower(value) == "on" {
+				doProfiling = true
+			}
 		}
 	}
 
@@ -56,6 +62,17 @@ func _main(ctx context.Context, environment []string) int { //nolint:unparam
 	}
 
 	ctx, cancel := context.WithCancel(ctx)
+
+	if doProfiling {
+		logger.Info("profiling server listening on :6060")
+		onShutdownError := func(err error) { logger.Error(err.Error()) }
+		profileServer := profiling.NewServer(onShutdownError)
+		go func() {
+			if err := profileServer.Run(ctx); err != nil {
+				logger.Error(err.Error())
+			}
+		}()
+	}
 
 	errorCh := make(chan error)
 	go func() {
