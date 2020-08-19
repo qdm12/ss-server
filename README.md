@@ -1,7 +1,5 @@
 # Shadowsocks server
 
-🚨 Unstable!! Please await until I fix things
-
 Focuses on a Dockerized Shadowsocks server as well as giving an easy to use Go API to run a Shadowsocks server.
 
 ## Docker
