@@ -1,5 +1,7 @@
 # Shadowsocks server
 
+🚨 Unstable!! Please await until I fix things
+
 Focuses on a Dockerized Shadowsocks server as well as giving an easy to use Go API to run a Shadowsocks server.
 
 ## Docker
@@ -124,6 +126,8 @@ func Test(t *testing.T) {
 
 ## TODOS
 
+- Microbadger
+- Readme badges and icon
 - Prometheus stats
 - Plugins (on demand)
 - Docker healthcheck + healthcheck endpoint (i.e. for K8s)
