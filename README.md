@@ -16,22 +16,22 @@ Run the container interactively to try it out
 docker run -it --rm -p 8388:8388/tcp -p 8388:8388/udp -e PASSWORD=password qmcgaw/ss-server
 ```
 
-Or use docker-compose.yml
+Or use docker-compose.yml with `docker-compose up -d`
 
 ```yml
 version: "3.7"
 services:
-shadowsocks:
-    image: qmcgaw/ss-server
-    container_name: shadowsocks
-    network_mode: bridge
-    ports:
-        - 8388:8388/tcp
-        - 8388:8388/udp
-    environment:
-        - PASSWORD=password
-        - TZ=
-    restart: always
+  shadowsocks:
+      image: qmcgaw/ss-server
+      container_name: shadowsocks
+      network_mode: bridge
+      ports:
+          - 8388:8388/tcp
+          - 8388:8388/udp
+      environment:
+          - PASSWORD=password
+          - TZ=
+      restart: always
 ```
 
 The environment variables are:
