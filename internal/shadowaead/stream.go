@@ -159,7 +159,7 @@ func (r *reader) WriteTo(writer io.Writer) (n int64, err error) {
 		}
 		if readError != nil {
 			if readError == io.EOF {
-				continue // ignore EOF error
+				return n, nil // ignore EOF error
 			}
 			return n, readError
 		}
