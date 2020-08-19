@@ -76,7 +76,7 @@ func _main(ctx context.Context, environment []string) int { //nolint:unparam
 
 	errorCh := make(chan error)
 	go func() {
-		errorCh <- server.Listen(ctx, "0.0.0.0:"+port)
+		errorCh <- server.Listen(ctx, ":"+port)
 	}()
 
 	OSSignals := make(chan os.Signal, 1)
