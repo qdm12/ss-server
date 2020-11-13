@@ -38,9 +38,7 @@ func (nm *natmap) Del(remoteAddress string) (packetConnection net.PacketConn) {
 }
 
 func (nm *natmap) Handle(peer net.Addr, dst, src net.PacketConn, logger log.Logger) {
-	if err := timedCopy(dst, peer, src, nm.timeNow); err != nil {
-		logger.Error("timed copy error: %s" + err.Error())
-	}
+	_ = timedCopy(dst, peer, src, nm.timeNow)
 	key := peer.String()
 	nm.mu.Lock()
 	packetConnection := nm.remoteAddressToConnection[key]

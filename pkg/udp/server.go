@@ -85,6 +85,7 @@ func (s *server) Listen(ctx context.Context, address string) (err error) {
 
 		connection := NATMap.Get(remoteAddress.String())
 		if connection == nil {
+			s.logger.Info(fmt.Sprintf("UDP proxying %s to %s", remoteAddress, targetAddress))
 			connection, err = net.ListenPacket("udp", "")
 			if err != nil {
 				s.logger.Info("cannot listen to UDP packet: " + err.Error())
