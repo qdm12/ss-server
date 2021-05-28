@@ -14,9 +14,9 @@ import (
 
 //nolint: gochecknoglobals
 var (
-	BuildDate = "unknown date"
-	VcsRef    = "unknown ref"
-	Version   = "unknown"
+	version = "unknown"
+	date    = "unknown"
+	commit  = "unknown"
 )
 
 func main() {
@@ -52,7 +52,7 @@ func _main(ctx context.Context, environment []string) int { //nolint:unparam
 
 	logger := log.NewLogger("", log.Level(logLevel))
 
-	logger.Info("Running version " + Version + " built on " + BuildDate + " (" + VcsRef + ")")
+	logger.Info("Running version " + version + " built on " + date + " (" + commit + ")")
 
 	server, err := pkg.NewServer(cipherName, password, logger)
 	if err != nil {

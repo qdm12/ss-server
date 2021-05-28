@@ -16,24 +16,24 @@ RUN go mod download 2>&1
 COPY . .
 RUN go test ./...
 RUN golangci-lint run --timeout=10m
-ARG BUILD_DATE=unknown
-ARG VCS_REF=local
-ARG VERSION=local
+ARG VERSION=unknown
+ARG DATE=unknown
+ARG COMMIT=unknown
 RUN go build -o app -trimpath -ldflags="-s -w \
-    -X 'main.BuildDate=$BUILD_DATE' \
-    -X 'main.VcsRef=$VCS_REF' \
-    -X 'main.Version=$VERSION'" \
+    -X 'main.version=$VERSION'" \
+    -X 'main.date=$DATE' \
+    -X 'main.commit=$COMMIT' \
     cmd/ss-server/main.go
 
 FROM scratch
-ARG VERSION
-ARG BUILD_DATE
-ARG VCS_REF
+ARG VERSION=unknown
+ARG DATE=unknown
+ARG COMMIT=unknown
 LABEL \
     org.opencontainers.image.authors="quentin.mcgaw@gmail.com" \
     org.opencontainers.image.version=$VERSION \
-    org.opencontainers.image.created=$BUILD_DATE \
-    org.opencontainers.image.revision=$VCS_REF \
+    org.opencontainers.image.created=$DATE \
+    org.opencontainers.image.revision=$COMMIT \
     org.opencontainers.image.url="https://github.com/qdm12/ss-server" \
     org.opencontainers.image.documentation="https://github.com/qdm12/ss-server/internal/blob/master/README.md" \
     org.opencontainers.image.source="https://github.com/qdm12/ss-server" \
