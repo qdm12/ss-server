@@ -2,7 +2,6 @@ package udp
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"time"
 
@@ -71,7 +70,7 @@ func (s *server) Listen(ctx context.Context, address string) (err error) {
 
 		targetAddress, err := socks.ExtractAddress(buffer[:bytesRead])
 		if err != nil {
-			s.logger.Error(fmt.Sprintf("cannot split target address from packet: %q", buffer[:bytesRead]))
+			s.logger.Error("cannot extract target address: " + err.Error())
 			continue
 		}
 
