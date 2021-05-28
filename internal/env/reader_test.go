@@ -3,6 +3,7 @@ package env
 import (
 	"testing"
 
+	"github.com/qdm12/ss-server/internal/log"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -134,17 +135,17 @@ func Test_reader_LogLevel(t *testing.T) {
 
 	testCases := map[string]struct {
 		reader   *reader
-		logLevel string
+		logLevel log.Level
 	}{
 		"default": {
 			reader:   &reader{},
-			logLevel: "INFO",
+			logLevel: log.InfoLevel,
 		},
 		"set value": {
 			reader: &reader{
 				envKV: map[string]string{"LOG_LEVEL": "value"},
 			},
-			logLevel: "value",
+			logLevel: log.Level("value"),
 		},
 	}
 

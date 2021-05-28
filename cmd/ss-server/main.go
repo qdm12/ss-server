@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"io"
 	"os"
 	"os/signal"
 	"syscall"
@@ -22,16 +23,16 @@ var (
 func main() {
 	ctx := context.Background()
 	environ := os.Environ()
-	os.Exit(_main(ctx, environ))
+	os.Exit(_main(ctx, environ, os.Stdout))
 }
 
-func _main(ctx context.Context, environ []string) int { //nolint:unparam
+func _main(ctx context.Context, environ []string, stdout io.Writer) int { //nolint:unparam
 	reader := env.NewReader(environ)
 	cipherName, password, port, logLevel, doProfiling :=
 		reader.CipherName(), reader.Password(), reader.Port(),
 		reader.LogLevel(), reader.Profiling()
 
-	logger := log.NewLogger("", log.Level(logLevel))
+	logger := log.New(logLevel, stdout)
 
 	logger.Info("Running version " + version + " built on " + date + " (" + commit + ")")
 

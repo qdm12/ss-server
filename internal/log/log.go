@@ -1,8 +1,8 @@
 package log
 
 import (
-	"fmt"
-	"time"
+	"io"
+	"log"
 )
 
 type Level string
@@ -14,27 +14,28 @@ const (
 )
 
 type Logger interface {
-	Error(s string)
-	Info(s string)
 	Debug(s string)
+	Info(s string)
+	Error(s string)
 }
 
-func NewLogger(prefix string, level Level) Logger {
+func New(level Level, w io.Writer) Logger {
+	flags := log.Ldate | log.Ltime | log.Lshortfile
+	logImpl := log.New(w, "", flags)
 	return &logger{
-		prefix:  prefix,
-		level:   level,
-		timeNow: time.Now,
+		level:  level,
+		logger: logImpl,
 	}
 }
 
 type logger struct {
-	prefix  string
-	level   Level
-	timeNow func() time.Time
+	level  Level
+	logger *log.Logger
 }
 
 func (l *logger) log(level Level, message string) {
-	fmt.Printf("%s [%s] %s%s\n", l.timeNow().Format(time.RFC3339), level, l.prefix, message)
+	const callDepth = 3
+	_ = l.logger.Output(callDepth, "["+string(level)+"] "+message)
 }
 
 func (l *logger) Debug(s string) {

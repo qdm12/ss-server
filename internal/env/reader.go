@@ -2,13 +2,15 @@ package env
 
 import (
 	"strings"
+
+	"github.com/qdm12/ss-server/internal/log"
 )
 
 type Reader interface {
 	CipherName() (cipherName string)
 	Password() (password string)
 	Port() (port string)
-	LogLevel() (logLevel string)
+	LogLevel() (logLevel log.Level)
 	Profiling() (profiling bool)
 }
 
@@ -57,10 +59,10 @@ func (r *reader) Port() (port string) {
 	return port
 }
 
-func (r *reader) LogLevel() (logLevel string) {
-	logLevel = r.envKV["LOG_LEVEL"]
+func (r *reader) LogLevel() (logLevel log.Level) {
+	logLevel = log.Level(r.envKV["LOG_LEVEL"])
 	if logLevel == "" {
-		const defaultLogLevel = "INFO"
+		const defaultLogLevel = log.InfoLevel
 		logLevel = defaultLogLevel
 	}
 	return logLevel
