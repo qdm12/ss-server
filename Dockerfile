@@ -8,7 +8,8 @@ FROM golang:${GO_VERSION}-alpine${ALPINE_VERSION} AS builder
 ARG GOLANGCI_LINT_VERSION=v1.40.1
 RUN apk --update add git
 ENV CGO_ENABLED=0
-RUN wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s ${GOLANGCI_LINT_VERSION}
+RUN wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | \
+    sh -s -- -b /usr/local/bin ${GOLANGCI_LINT_VERSION}
 WORKDIR /tmp/gobuild
 COPY .golangci.yml .
 COPY go.mod go.sum ./
@@ -20,9 +21,9 @@ ARG VERSION=unknown
 ARG DATE=unknown
 ARG COMMIT=unknown
 RUN go build -o app -trimpath -ldflags="-s -w \
-    -X 'main.version=$VERSION'" \
+    -X 'main.version=$VERSION' \
     -X 'main.date=$DATE' \
-    -X 'main.commit=$COMMIT' \
+    -X 'main.commit=$COMMIT'" \
     cmd/ss-server/main.go
 
 FROM scratch
