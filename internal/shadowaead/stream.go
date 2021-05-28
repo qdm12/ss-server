@@ -29,14 +29,14 @@ func newWriter(ioWriter io.Writer, aeadCipher cipher.AEAD) *writer {
 	}
 }
 
-// Write encrypts b and writes to the writer w
+// Write encrypts b and writes to the writer w.
 func (w *writer) Write(b []byte) (int, error) {
 	n, err := w.ReadFrom(bytes.NewBuffer(b))
 	return int(n), err
 }
 
 // ReadFrom reads from the given reader until EOF or an error occurs, encrypts and
-// writes to the writer w
+// writes to the writer w.
 func (w *writer) ReadFrom(reader io.Reader) (n int64, err error) {
 	cipherOverhead := w.cipher.Overhead()
 	for {
@@ -48,7 +48,8 @@ func (w *writer) ReadFrom(reader io.Reader) (n int64, err error) {
 			n += int64(nr)
 			buf = buf[:2+cipherOverhead+nr+cipherOverhead]
 			payloadBuf = payloadBuf[:nr]
-			buf[0], buf[1] = byte(nr>>8), byte(nr) // big-endian payload size
+			// big-endian payload size
+			buf[0], buf[1] = byte(nr>>8), byte(nr) //nolint:gomnd
 			w.cipher.Seal(buf[:0], w.nonce, buf[:2], nil)
 			increment(w.nonce)
 			w.cipher.Seal(payloadBuf[:0], w.nonce, payloadBuf, nil)
@@ -137,7 +138,7 @@ func (r *reader) Read(b []byte) (int, error) {
 }
 
 // WriteTo reads from the reader, decrypts and writes to writer until
-// there is no more data to write or an error occurs
+// there is no more data to write or an error occurs.
 func (r *reader) WriteTo(writer io.Writer) (n int64, err error) {
 	// write decrypted bytes left over from previous record
 	for len(r.leftOver) > 0 {
@@ -166,7 +167,7 @@ func (r *reader) WriteTo(writer io.Writer) (n int64, err error) {
 	}
 }
 
-// increment little-endian encoded unsigned integer b and wrap around on overflow
+// increment little-endian encoded unsigned integer b and wrap around on overflow.
 func increment(b []byte) {
 	for i := range b {
 		b[i]++
@@ -176,7 +177,7 @@ func increment(b []byte) {
 	}
 }
 
-// NewConn wraps a stream net.Conn connection with a cipher
+// NewConn wraps a stream net.Conn connection with a cipher.
 func NewConn(connection net.Conn, aead AEADCipher, saltFilter filter.SaltFilter) net.Conn {
 	return &streamConn{
 		Conn:       connection,

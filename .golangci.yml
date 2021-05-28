@@ -7,43 +7,57 @@ linters-settings:
 linters:
   disable-all: true
   enable:
+    - asciicheck
     - bodyclose
     - deadcode
     - dogsled
+    - dupl
     - errcheck
+    - exhaustive
+    - exportloopref
+    - gci
     - gochecknoglobals
     - gochecknoinits
     - gocognit
     - goconst
     - gocritic
     - gocyclo
+    - godot
+    - goheader
     - goimports
-    - golint
+    - gomnd
+    - goprintffuncname
     - gosec
+    # - goerr113 # TODO
     - gosimple
     - govet
+    - importas
     - ineffassign
-    - interfacer
-    - maligned
+    - lll
     - misspell
     - nakedret
+    - nestif
+    - nilerr
+    - noctx
+    - nolintlint
     - prealloc
+    - predeclared
     - rowserrcheck
-    - scopelint
+    - exportloopref
+    - sqlclosecheck
     - staticcheck
     - structcheck
+    - thelper
+    - tparallel
     - typecheck
     - unconvert
     - unparam
     - unused
     - varcheck
+    - wastedassign
     - whitespace
 
 run:
   skip-dirs:
     - .devcontainer
     - .github
-    - postgres
-
-service:
-  golangci-lint-version: 1.30.x # use the fixed version to not introduce new linters unexpectedly

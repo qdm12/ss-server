@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-// SOCKS address types
+// SOCKS address types.
 const (
 	addressTypeIPv4       = 1
 	addressTypeDomainName = 3
@@ -16,22 +16,22 @@ const (
 
 const maxSocksAddrressLength = 1 + 1 + 255 + 2
 
-// Address is a SOCKS address
+// Address is a SOCKS address.
 type Address []byte
 
-// String serializes a SOCKS address to a string
+// String serializes a SOCKS address to a string.
 func (a Address) String() string {
 	var host, port string
 	switch a[0] { // address type
 	case addressTypeDomainName:
 		host = string(a[2 : 2+int(a[1])])
-		port = strconv.Itoa((int(a[2+int(a[1])]) << 8) | int(a[2+int(a[1])+1]))
+		port = strconv.Itoa((int(a[2+int(a[1])]) << 8) | int(a[2+int(a[1])+1])) //nolint:gomnd
 	case addressTypeIPv4:
 		host = net.IP(a[1 : 1+net.IPv4len]).String()
-		port = strconv.Itoa((int(a[1+net.IPv4len]) << 8) | int(a[1+net.IPv4len+1]))
+		port = strconv.Itoa((int(a[1+net.IPv4len]) << 8) | int(a[1+net.IPv4len+1])) //nolint:gomnd
 	case addressTypeIPv6:
 		host = net.IP(a[1 : 1+net.IPv6len]).String()
-		port = strconv.Itoa((int(a[1+net.IPv6len]) << 8) | int(a[1+net.IPv6len+1]))
+		port = strconv.Itoa((int(a[1+net.IPv6len]) << 8) | int(a[1+net.IPv6len+1])) //nolint:gomnd
 	}
 	return net.JoinHostPort(host, port)
 }
@@ -59,15 +59,15 @@ func readAddress(reader io.Reader, buffer []byte) (socksAddress Address, err err
 		_, err = io.ReadFull(reader, buffer[1:1+net.IPv6len+2])
 		return buffer[:1+net.IPv6len+2], err
 	}
-	return nil, fmt.Errorf("Socks address type %b is not supported", buffer[0])
+	return nil, fmt.Errorf("socks address type %b is not supported", buffer[0])
 }
 
-// ReadAddress reads bytes from the reader to get a Socks address
+// ReadAddress reads bytes from the reader to get a Socks address.
 func ReadAddress(reader io.Reader) (socksAddress Address, err error) {
 	return readAddress(reader, make([]byte, maxSocksAddrressLength))
 }
 
-// ExtractAddress extracts a SOCKS address from the beginning of a packet
+// ExtractAddress extracts a SOCKS address from the beginning of a packet.
 func ExtractAddress(packet []byte) (socksAddress Address, err error) {
 	if len(packet) == 0 {
 		return nil, fmt.Errorf("cannot extract SOCKS address from empty packet")
@@ -78,11 +78,11 @@ func ExtractAddress(packet []byte) (socksAddress Address, err error) {
 		if len(packet) <= 1 {
 			return nil, fmt.Errorf("cannot extract SOCKS address from packet with 0/1 byte for a domain name type address")
 		}
-		length = 1 + 1 + int(packet[1]) + 2
+		length = 1 + 1 + int(packet[1]) + 2 //nolint:gomnd
 	case addressTypeIPv4:
-		length = 1 + net.IPv4len + 2
+		length = 1 + net.IPv4len + 2 //nolint:gomnd
 	case addressTypeIPv6:
-		length = 1 + net.IPv6len + 2
+		length = 1 + net.IPv6len + 2 //nolint:gomnd
 	default:
 		return nil, fmt.Errorf("unknown SOCKS address type %b", packet[0])
 	}
@@ -92,7 +92,7 @@ func ExtractAddress(packet []byte) (socksAddress Address, err error) {
 	return packet[:length], nil
 }
 
-// ParseAddress parses the SOCKS address from a network address
+// ParseAddress parses the SOCKS address from a network address.
 func ParseAddress(remoteAddress net.Addr) (socksAddress Address, err error) {
 	s := remoteAddress.String()
 	host, portStr, err := net.SplitHostPort(s)
@@ -104,19 +104,22 @@ func ParseAddress(remoteAddress net.Addr) (socksAddress Address, err error) {
 	if ip != nil {
 		ipv4 = ip.To4()
 	}
+
+	const maxHostLength = 255
+
 	switch {
 	case ipv4 != nil:
-		socksAddress = make([]byte, 1+net.IPv4len+2)
+		socksAddress = make([]byte, 1+net.IPv4len+2) //nolint:gomnd
 		socksAddress[0] = addressTypeIPv4
 		copy(socksAddress[1:], ipv4)
 	case ip != nil: // ipv6
-		socksAddress = make([]byte, 1+net.IPv6len+2)
+		socksAddress = make([]byte, 1+net.IPv6len+2) //nolint:gomnd
 		socksAddress[0] = addressTypeIPv6
 		copy(socksAddress[1:], ip)
-	case len(host) > 255:
+	case len(host) > maxHostLength:
 		return nil, fmt.Errorf("parsed host %q cannot be longer than 255 characters", host)
 	default:
-		socksAddress = make([]byte, 1+1+len(host)+2)
+		socksAddress = make([]byte, 1+1+len(host)+2) //nolint:gomnd
 		socksAddress[0] = addressTypeDomainName
 		socksAddress[1] = byte(len(host))
 		copy(socksAddress[2:], host)
@@ -125,7 +128,7 @@ func ParseAddress(remoteAddress net.Addr) (socksAddress Address, err error) {
 	if err != nil {
 		return nil, fmt.Errorf("cannot parse port %q: %w", portStr, err)
 	}
-	socksAddress[len(socksAddress)-2] = byte(port >> 8)
+	socksAddress[len(socksAddress)-2] = byte(port >> 8) //nolint:gomnd
 	socksAddress[len(socksAddress)-1] = byte(port)
 	return socksAddress, nil
 }

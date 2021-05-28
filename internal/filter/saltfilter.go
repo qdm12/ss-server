@@ -13,7 +13,7 @@ const (
 	saltFilterSlotsNumber       = 10
 )
 
-// SaltFilter is used to mitigate replay attacks by detecting repeated salts
+// SaltFilter is used to mitigate replay attacks by detecting repeated salts.
 type SaltFilter interface {
 	AddSalt(b []byte)
 	IsSaltRepeated(b []byte) bool
@@ -35,7 +35,7 @@ func newBloomRing() *bloomRing {
 	return br
 }
 
-// Double FNV as the Bloom Filter hash
+// Double FNV as the Bloom Filter hash.
 func doubleFNV(b []byte) (uint64, uint64) {
 	hx := fnv.New64()
 	_, _ = hx.Write(b)

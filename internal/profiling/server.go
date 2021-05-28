@@ -33,7 +33,8 @@ func NewServer(onShutdownError func(err error)) ProfileServer {
 func (ps *profileServer) Run(ctx context.Context) error {
 	go func() { // shutdown goroutine blocked by ctx
 		<-ctx.Done()
-		timeoutCtx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
+		const timeoutDuration = 10 * time.Millisecond
+		timeoutCtx, cancel := context.WithTimeout(context.Background(), timeoutDuration)
 		defer cancel()
 		if err := ps.httpServer.Shutdown(timeoutCtx); err != nil {
 			ps.onShutdownError(err)

@@ -36,7 +36,7 @@ type server struct {
 	udpPacketCipher core.UDPPacketCipher
 }
 
-// Listen listens on the address given for encrypted packets and does UDP NATing
+// Listen listens on the address given for encrypted packets and does UDP NATing.
 func (s *server) Listen(ctx context.Context, address string) (err error) {
 	listenConfig := net.ListenConfig{}
 	packetConnection, err := listenConfig.ListenPacket(ctx, "udp", address)
@@ -62,8 +62,8 @@ func (s *server) Listen(ctx context.Context, address string) (err error) {
 	for {
 		bytesRead, remoteAddress, err := packetConnection.ReadFrom(buffer)
 		if err != nil {
-			if ctx.Err() != nil {
-				return nil
+			if ctxErr := ctx.Err(); ctxErr != nil {
+				return ctxErr
 			}
 			s.logger.Error("cannot read from UDP buffer: " + err.Error())
 			continue

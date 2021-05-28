@@ -1,5 +1,6 @@
 package shadowaead
 
+//nolint:gci
 import (
 	"crypto/aes"
 	"crypto/cipher"
@@ -25,10 +26,11 @@ func (c *aeadCipherAdapter) keySize() int {
 }
 
 func (c *aeadCipherAdapter) SaltSize() int {
-	if ks := c.keySize(); ks > 16 {
+	const minimumSaltSize = 16
+	if ks := c.keySize(); ks > minimumSaltSize {
 		return ks
 	}
-	return 16 // force minimum salt size to 16 bytes
+	return minimumSaltSize
 }
 
 func (c *aeadCipherAdapter) Crypter(salt []byte) (cipher.AEAD, error) {
@@ -39,7 +41,7 @@ func (c *aeadCipherAdapter) Crypter(salt []byte) (cipher.AEAD, error) {
 	return c.newAEADCipher(subkey)
 }
 
-// Chacha20Poly1305 creates a new Cipher with a pre-shared key of 32 bytes
+// Chacha20Poly1305 creates a new Cipher with a pre-shared key of 32 bytes.
 func Chacha20Poly1305(preSharedKey []byte) AEADCipher {
 	return &aeadCipherAdapter{
 		preSharedKey:  preSharedKey,
@@ -47,7 +49,7 @@ func Chacha20Poly1305(preSharedKey []byte) AEADCipher {
 	}
 }
 
-// AESGCM creates a new Cipher with a pre-shared key of 16 or 32 bytes
+// AESGCM creates a new Cipher with a pre-shared key of 16 or 32 bytes.
 func AESGCM(preSharedKey []byte) AEADCipher {
 	return &aeadCipherAdapter{
 		preSharedKey:  preSharedKey,

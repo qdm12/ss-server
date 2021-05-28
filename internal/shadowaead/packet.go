@@ -21,7 +21,7 @@ type cipherPacketConn struct {
 	buffer     []byte // write lock
 }
 
-// NewPacketConn wraps a net.PacketConn with a cipher
+// NewPacketConn wraps a net.PacketConn with a cipher.
 func NewPacketConn(connection net.PacketConn, aead AEADCipher, saltFilter filter.SaltFilter) net.PacketConn {
 	const maxUDPPacketSize = 64 * 1024
 	return &cipherPacketConn{
@@ -59,7 +59,7 @@ func (c *cipherPacketConn) ReadFrom(b []byte) (int, net.Addr, error) {
 }
 
 // pack encrypts a plaintext using the cipher provided, with a randomly generated salt and
-// returns a slice of dst containing the encrypted packet
+// returns a slice of dst containing the encrypted packet.
 func (c *cipherPacketConn) pack(dst, plaintext []byte) ([]byte, error) {
 	saltSize := c.aead.SaltSize()
 	salt := dst[:saltSize]

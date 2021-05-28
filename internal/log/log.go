@@ -44,8 +44,7 @@ func (l *logger) Debug(s string) {
 }
 
 func (l *logger) Info(s string) {
-	switch l.level {
-	case DebugLevel, InfoLevel:
+	if l.level == DebugLevel || l.level == InfoLevel {
 		l.log(InfoLevel, s)
 	}
 }

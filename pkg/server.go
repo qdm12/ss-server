@@ -84,7 +84,8 @@ func (s *server) Listen(ctx context.Context, address string) (err error) {
 			delete(serversRunning, serverExited)
 		case <-timeoutCtx.Done():
 			for serverNotExited := range serversRunning {
-				s.logger.Error(fmt.Sprintf("%s did not exit during the %s shutdown grace period", serverNotExited, shutdownGracePeriod))
+				s.logger.Error(serverNotExited + " did not exit during the " +
+					shutdownGracePeriod.String() + " shutdown grace period")
 			}
 			return err
 		}

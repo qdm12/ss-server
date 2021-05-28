@@ -1,14 +1,15 @@
 package core
 
+//nolint:gci
 import (
-	"crypto/md5" //nolint: gosec
+	"crypto/md5" //nolint:gosec
 	"fmt"
 	"strings"
 )
 
-// Derives a key from the password with a size depending on the cipher chosen
+// Derives a key from the password with a size depending on the cipher chosen.
 func deriveKey(password, cipherName string) (key []byte, err error) {
-	keySize := 0
+	var keySize int
 	switch strings.ToLower(cipherName) {
 	case aes128gcm:
 		keySize = 16
@@ -20,10 +21,10 @@ func deriveKey(password, cipherName string) (key []byte, err error) {
 	return kdf(password, keySize)
 }
 
-// key derivation function from the original Shadowsocks spec based on md5
+// key derivation function from the original Shadowsocks spec based on md5.
 func kdf(password string, length int) (key []byte, err error) {
 	var b, prev []byte
-	h := md5.New() //nolint: go-sec
+	h := md5.New() //nolint:gosec
 	for len(b) < length {
 		if _, err := h.Write(prev); err != nil {
 			return nil, err

@@ -38,7 +38,7 @@ type server struct {
 	tcpStreamCipher core.TCPStreamCipher
 }
 
-// Listen listens on the address given for incoming connections
+// Listen listens on the address given for incoming connections.
 func (s *server) Listen(ctx context.Context, address string) (err error) {
 	listenConfig := net.ListenConfig{}
 	listener, err := listenConfig.Listen(ctx, "tcp", address)
@@ -55,8 +55,8 @@ func (s *server) Listen(ctx context.Context, address string) (err error) {
 	for {
 		connection, err := listener.Accept()
 		if err != nil {
-			if ctx.Err() != nil {
-				return nil
+			if ctxErr := ctx.Err(); ctxErr != nil {
+				return ctxErr
 			}
 			s.logger.Error("cannot accept connection on TCP listener: " + err.Error())
 			continue

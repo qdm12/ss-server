@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// relay copies between left and right connections bidirectionally
+// relay copies between left and right connections bidirectionally.
 func relay(left, right net.Conn, timeNow func() time.Time) (err error) {
 	errors := make(chan error)
 	defer close(errors)
