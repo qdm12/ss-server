@@ -12,7 +12,7 @@ import (
 	"github.com/qdm12/ss-server/internal/socks"
 )
 
-//go:generate mockgen -destination=mock_$GOPACKAGE/$GOFILE.go . Server
+//go:generate mockgen -destination=mock_$GOPACKAGE/$GOFILE . Server
 
 type Server interface {
 	Listen(ctx context.Context, address string) (err error)
