@@ -10,12 +10,14 @@ type Level string
 const (
 	DebugLevel Level = "DEBUG"
 	InfoLevel  Level = "INFO"
+	WarnLevel  Level = "WARN"
 	ErrorLevel Level = "ERROR"
 )
 
 type Logger interface {
 	Debug(s string)
 	Info(s string)
+	Warn(s string)
 	Error(s string)
 }
 
@@ -47,6 +49,14 @@ func (l *logger) Debug(s string) {
 func (l *logger) Info(s string) {
 	if l.level == DebugLevel || l.level == InfoLevel {
 		l.log(InfoLevel, s)
+	}
+}
+
+func (l *logger) Warn(s string) {
+	switch l.level {
+	case DebugLevel, InfoLevel, WarnLevel:
+		l.log(WarnLevel, s)
+	case ErrorLevel:
 	}
 }
 
