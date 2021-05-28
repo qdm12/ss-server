@@ -4,9 +4,9 @@ import (
 	"context"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 
+	"github.com/qdm12/ss-server/internal/env"
 	"github.com/qdm12/ss-server/internal/log"
 	"github.com/qdm12/ss-server/internal/profiling"
 	"github.com/qdm12/ss-server/pkg"
@@ -25,30 +25,11 @@ func main() {
 	os.Exit(_main(ctx, environ))
 }
 
-func _main(ctx context.Context, environment []string) int { //nolint:unparam
-	cipherName := "chacha20-ietf-poly1305"
-	password := "password"
-	port := "8388"
-	logLevel := "INFO"
-	doProfiling := false
-	for _, envVariable := range environment {
-		slice := strings.Split(envVariable, "=")
-		key, value := slice[0], slice[1]
-		switch key {
-		case "PASSWORD":
-			password = value
-		case "PORT":
-			port = value
-		case "CIPHER":
-			cipherName = value
-		case "LOG_LEVEL":
-			logLevel = strings.ToUpper(value)
-		case "PROFILING":
-			if strings.ToLower(value) == "on" {
-				doProfiling = true
-			}
-		}
-	}
+func _main(ctx context.Context, environ []string) int { //nolint:unparam
+	reader := env.NewReader(environ)
+	cipherName, password, port, logLevel, doProfiling :=
+		reader.CipherName(), reader.Password(), reader.Port(),
+		reader.LogLevel(), reader.Profiling()
 
 	logger := log.NewLogger("", log.Level(logLevel))
 
