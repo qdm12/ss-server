@@ -22,7 +22,7 @@ The Docker image is:
 
 - Based on Scratch (no OS) for a total size of **3.53MB**
 - Compatible with `amd64`, `386` and all `arm` (i.e. raspberry pis)
-- Shadowsocks is implemented in Go and compiled statically using Go 1.15
+- Shadowsocks is implemented in Go and compiled statically using Go 1.16
 
 Run the container interactively to try it out
 

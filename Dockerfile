@@ -1,5 +1,5 @@
 ARG ALPINE_VERSION=3.12
-ARG GO_VERSION=1.15
+ARG GO_VERSION=1.16
 
 FROM alpine:${ALPINE_VERSION} AS alpine
 RUN apk --update add tzdata
