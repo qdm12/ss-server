@@ -10,8 +10,8 @@ import (
 
 	"github.com/qdm12/ss-server/internal/core"
 	"github.com/qdm12/ss-server/internal/filter"
-	"github.com/qdm12/ss-server/internal/log"
 	"github.com/qdm12/ss-server/internal/socks"
+	"github.com/qdm12/ss-server/pkg/log"
 )
 
 //go:generate mockgen -destination=mock_$GOPACKAGE/$GOFILE . Server

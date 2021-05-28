@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/qdm12/ss-server/internal/log"
+	"github.com/qdm12/ss-server/pkg/log"
 	"github.com/qdm12/ss-server/pkg/tcp"
 	"github.com/qdm12/ss-server/pkg/udp"
 )

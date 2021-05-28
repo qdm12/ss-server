@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/qdm12/ss-server/internal/log"
 	"github.com/qdm12/ss-server/internal/socks"
+	"github.com/qdm12/ss-server/pkg/log"
 )
 
 // Packet NAT table.
