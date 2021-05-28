@@ -3,9 +3,12 @@ package core
 //nolint:gci
 import (
 	"crypto/md5" //nolint:gosec
+	"errors"
 	"fmt"
 	"strings"
 )
+
+var ErrCipherNotSupported = errors.New("cipher is not supported")
 
 // Derives a key from the password with a size depending on the cipher chosen.
 func deriveKey(password, cipherName string) (key []byte, err error) {
@@ -16,7 +19,7 @@ func deriveKey(password, cipherName string) (key []byte, err error) {
 	case chacha20IetfPoly1305, aes256gcm:
 		keySize = 32
 	default:
-		return nil, fmt.Errorf("cipher %q is not supported", cipherName)
+		return nil, fmt.Errorf("%w: %s", ErrCipherNotSupported, cipherName)
 	}
 	return kdf(password, keySize)
 }

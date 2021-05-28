@@ -21,7 +21,7 @@ func NewTCPStreamCipher(name, password string, saltFilter filter.SaltFilter) (ci
 	case aes128gcm, aes256gcm:
 		aead = shadowaead.AESGCM(key)
 	default:
-		return nil, fmt.Errorf("cipher %q is not supported", name)
+		return nil, fmt.Errorf("%w: for TCP: %s", ErrCipherNotSupported, name)
 	}
 	return &tcpStreamCipher{
 		aead:       aead,

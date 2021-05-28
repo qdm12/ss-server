@@ -28,7 +28,7 @@ linters:
     - gomnd
     - goprintffuncname
     - gosec
-    # - goerr113 # TODO
+    - goerr113
     - gosimple
     - govet
     - importas

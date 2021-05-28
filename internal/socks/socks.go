@@ -1,6 +1,7 @@
 package socks
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -15,6 +16,13 @@ const (
 )
 
 const maxSocksAddrressLength = 1 + 1 + 255 + 2
+
+var (
+	errSocksAddressTypeNotSupported = errors.New("socks address type not supported")
+	errPacketEmpty                  = errors.New("packet is empty")
+	errSocksAddressDomainSizeAbsent = errors.New("domain name type address size byte does not exist")
+	errSocksAddressPacketTooShort   = errors.New("packet is too short to contain the socks address")
+)
 
 // Address is a SOCKS address.
 type Address []byte
@@ -59,7 +67,7 @@ func readAddress(reader io.Reader, buffer []byte) (socksAddress Address, err err
 		_, err = io.ReadFull(reader, buffer[1:1+net.IPv6len+2])
 		return buffer[:1+net.IPv6len+2], err
 	}
-	return nil, fmt.Errorf("socks address type %b is not supported", buffer[0])
+	return nil, fmt.Errorf("%w: %b", errSocksAddressTypeNotSupported, buffer[0])
 }
 
 // ReadAddress reads bytes from the reader to get a Socks address.
@@ -70,13 +78,13 @@ func ReadAddress(reader io.Reader) (socksAddress Address, err error) {
 // ExtractAddress extracts a SOCKS address from the beginning of a packet.
 func ExtractAddress(packet []byte) (socksAddress Address, err error) {
 	if len(packet) == 0 {
-		return nil, fmt.Errorf("cannot extract SOCKS address from empty packet")
+		return nil, errPacketEmpty
 	}
 	var length int
 	switch packet[0] {
 	case addressTypeDomainName:
-		if len(packet) <= 1 {
-			return nil, fmt.Errorf("cannot extract SOCKS address from packet with 0/1 byte for a domain name type address")
+		if len(packet) == 1 {
+			return nil, errSocksAddressDomainSizeAbsent
 		}
 		length = 1 + 1 + int(packet[1]) + 2 //nolint:gomnd
 	case addressTypeIPv4:
@@ -84,13 +92,19 @@ func ExtractAddress(packet []byte) (socksAddress Address, err error) {
 	case addressTypeIPv6:
 		length = 1 + net.IPv6len + 2 //nolint:gomnd
 	default:
-		return nil, fmt.Errorf("unknown SOCKS address type %b", packet[0])
+		return nil, fmt.Errorf("%w: %b", errSocksAddressTypeNotSupported, packet[0])
 	}
 	if len(packet) < length {
-		return nil, fmt.Errorf("cannot extract %d bytes SOCKS address from packet with %d bytes", length, len(packet))
+		return nil, fmt.Errorf("%w: %d bytes but expected %d bytes",
+			errSocksAddressPacketTooShort, length, len(packet))
 	}
 	return packet[:length], nil
 }
+
+var (
+	errHostTooLong = errors.New("host is too long")
+	errPortParse   = errors.New("cannot parse port")
+)
 
 // ParseAddress parses the SOCKS address from a network address.
 func ParseAddress(remoteAddress net.Addr) (socksAddress Address, err error) {
@@ -117,7 +131,8 @@ func ParseAddress(remoteAddress net.Addr) (socksAddress Address, err error) {
 		socksAddress[0] = addressTypeIPv6
 		copy(socksAddress[1:], ip)
 	case len(host) > maxHostLength:
-		return nil, fmt.Errorf("parsed host %q cannot be longer than 255 characters", host)
+		return nil, fmt.Errorf("%w: %s is longer than 255 characters",
+			errHostTooLong, host)
 	default:
 		socksAddress = make([]byte, 1+1+len(host)+2) //nolint:gomnd
 		socksAddress[0] = addressTypeDomainName
@@ -126,12 +141,16 @@ func ParseAddress(remoteAddress net.Addr) (socksAddress Address, err error) {
 	}
 	port, err := strconv.ParseUint(portStr, 10, 16)
 	if err != nil {
-		return nil, fmt.Errorf("cannot parse port %q: %w", portStr, err)
+		return nil, fmt.Errorf("%w: %s: %s", errPortParse, portStr, err)
 	}
 	socksAddress[len(socksAddress)-2] = byte(port >> 8) //nolint:gomnd
 	socksAddress[len(socksAddress)-1] = byte(port)
 	return socksAddress, nil
 }
+
+var (
+	ErrSocksCommandNotSupported = errors.New("socks command is not supported")
+)
 
 // Handshake fast-tracks SOCKS initialization to get target address to connect.
 func Handshake(readWriter io.ReadWriter) (targetAddress Address, err error) {
@@ -139,23 +158,23 @@ func Handshake(readWriter io.ReadWriter) (targetAddress Address, err error) {
 	buffer := make([]byte, maxSocksAddrressLength)
 	// read VER, NMETHODS, METHODS
 	if _, err := io.ReadFull(readWriter, buffer[:2]); err != nil {
-		return nil, fmt.Errorf("cannot handshake: %w", err)
+		return nil, err
 	}
 	nmethods := buffer[1]
 	if _, err := io.ReadFull(readWriter, buffer[:nmethods]); err != nil {
-		return nil, fmt.Errorf("cannot handshake: %w", err)
+		return nil, err
 	}
 	// write VER METHOD
 	if _, err := readWriter.Write([]byte{5, 0}); err != nil {
-		return nil, fmt.Errorf("cannot handshake: %w", err)
+		return nil, err
 	}
 	// read VER CMD RSV ATYP DST.ADDR DST.PORT
 	if _, err := io.ReadFull(readWriter, buffer[:3]); err != nil {
-		return nil, fmt.Errorf("cannot handshake: %w", err)
+		return nil, err
 	}
 	targetAddress, err = readAddress(readWriter, buffer)
 	if err != nil {
-		return nil, fmt.Errorf("cannot handshake: %w", err)
+		return nil, err
 	}
 
 	const (
@@ -168,10 +187,10 @@ func Handshake(readWriter io.ReadWriter) (targetAddress Address, err error) {
 		replySuccess := []byte{5, 0, 0, 1, 0, 0, 0, 0, 0, 0}
 		_, err = readWriter.Write(replySuccess)
 		if err != nil {
-			return nil, fmt.Errorf("cannot handshake: %w", err)
+			return nil, err
 		}
 	default:
-		return nil, fmt.Errorf("cannot handshake: SOCKS command %b is not supported", buffer[1])
+		return nil, fmt.Errorf("%w: %b", ErrSocksCommandNotSupported, buffer[1])
 	}
 	return targetAddress, nil // skip VER, CMD, RSV fields
 }

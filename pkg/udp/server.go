@@ -41,7 +41,7 @@ func (s *server) Listen(ctx context.Context, address string) (err error) {
 	listenConfig := net.ListenConfig{}
 	packetConnection, err := listenConfig.ListenPacket(ctx, "udp", address)
 	if err != nil {
-		return fmt.Errorf("cannot listen to UDP address %q: %w", address, err)
+		return err
 	}
 	go func() {
 		<-ctx.Done()
@@ -58,7 +58,7 @@ func (s *server) Listen(ctx context.Context, address string) (err error) {
 
 	buffer := make([]byte, bufferSize)
 
-	s.logger.Info(fmt.Sprintf("listening UDP on %s", address))
+	s.logger.Info("listening UDP on " + address)
 	for {
 		bytesRead, remoteAddress, err := packetConnection.ReadFrom(buffer)
 		if err != nil {

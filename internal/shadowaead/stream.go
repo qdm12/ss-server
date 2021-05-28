@@ -200,7 +200,7 @@ func (c *streamConn) initReader() error {
 		return err
 	}
 	if c.saltFilter.IsSaltRepeated(salt) {
-		return fmt.Errorf("possible replay attack, dropping the packet (repeated salt detected)")
+		return fmt.Errorf("%w: possible replay attack, dropping the packet", errRepeatedSalt)
 	}
 	aead, err := c.aead.Crypter(salt)
 	if err != nil {

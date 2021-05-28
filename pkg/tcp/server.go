@@ -43,7 +43,7 @@ func (s *server) Listen(ctx context.Context, address string) (err error) {
 	listenConfig := net.ListenConfig{}
 	listener, err := listenConfig.Listen(ctx, "tcp", address)
 	if err != nil {
-		return fmt.Errorf("cannot listen on %s: %w", address, err)
+		return err
 	}
 	go func() {
 		<-ctx.Done()
@@ -51,7 +51,7 @@ func (s *server) Listen(ctx context.Context, address string) (err error) {
 			s.logger.Error(err.Error())
 		}
 	}()
-	s.logger.Info(fmt.Sprintf("listening TCP on %s", address))
+	s.logger.Info("listening TCP on " + address)
 	for {
 		connection, err := listener.Accept()
 		if err != nil {

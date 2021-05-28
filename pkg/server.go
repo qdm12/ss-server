@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -40,6 +41,11 @@ func NewServer(cipherName, password string, logger log.Logger) (s Server, err er
 	}, nil
 }
 
+var (
+	ErrUDPServer = errors.New("UDP server crashed")
+	ErrTCPServer = errors.New("TCP server crashed")
+)
+
 func (s *server) Listen(ctx context.Context, address string) (err error) {
 	ctx, cancel := context.WithCancel(ctx)
 
@@ -54,14 +60,14 @@ func (s *server) Listen(ctx context.Context, address string) (err error) {
 	go func() {
 		udpErr := s.udpServer.Listen(ctx, address)
 		if ctx.Err() == nil && udpErr != nil {
-			errorCh <- fmt.Errorf("UDP server crashed: %w", udpErr)
+			errorCh <- fmt.Errorf("%w: %s", ErrUDPServer, udpErr)
 		}
 		exited <- "UDP server"
 	}()
 	go func() {
 		tcpErr := s.tcpServer.Listen(ctx, address)
 		if ctx.Err() == nil && tcpErr != nil {
-			errorCh <- fmt.Errorf("TCP server crashed: %w", tcpErr)
+			errorCh <- fmt.Errorf("%w: %s", ErrTCPServer, tcpErr)
 		}
 		exited <- "TCP server"
 	}()

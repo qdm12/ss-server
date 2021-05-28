@@ -2,6 +2,7 @@ package shadowaead
 
 import (
 	"crypto/rand"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -80,16 +81,22 @@ func (c *cipherPacketConn) pack(dst, plaintext []byte) ([]byte, error) {
 	return dst[:saltSize+len(b)], nil
 }
 
+var (
+	errPacketTooShort = errors.New("packet is too short")
+	errRepeatedSalt   = errors.New("repeated salt detected")
+)
+
 // unpack decrypts a packet using the cipher provided and returns a slice of dst containing
 // the decrypted packet.
 func (c *cipherPacketConn) unpack(dst, packet []byte) (plaintext []byte, err error) {
 	saltSize := c.aead.SaltSize()
 	if len(packet) < saltSize {
-		return nil, fmt.Errorf("packet is too short (%d < %d)", len(packet), saltSize)
+		return nil, fmt.Errorf("%w: %d bytes instead of minimum of %d bytes",
+			errPacketTooShort, len(packet), saltSize)
 	}
 	salt := packet[:saltSize]
 	if c.saltFilter.IsSaltRepeated(salt) {
-		return nil, fmt.Errorf("possible replay attack, dropping the packet (repeated salt detected)")
+		return nil, fmt.Errorf("%w: possible replay attack, dropping the packet", errRepeatedSalt)
 	}
 	aead, err := c.aead.Crypter(salt)
 	if err != nil {
@@ -97,7 +104,8 @@ func (c *cipherPacketConn) unpack(dst, packet []byte) (plaintext []byte, err err
 	}
 	c.saltFilter.AddSalt(salt)
 	if len(packet) < saltSize+aead.Overhead() {
-		return nil, fmt.Errorf("packet of %d bytes is too short to be a valid encrypted packet", len(packet))
+		return nil, fmt.Errorf("%w: %d bytes is too short to be a valid encrypted packet",
+			errPacketTooShort, len(packet))
 	}
 	if saltSize+len(dst)+aead.Overhead() < len(packet) {
 		return nil, io.ErrShortBuffer

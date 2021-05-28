@@ -2,6 +2,7 @@ package profiling
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/http/pprof"
 	"time"
@@ -41,7 +42,7 @@ func (ps *profileServer) Run(ctx context.Context) error {
 		}
 	}()
 	err := ps.httpServer.ListenAndServe()
-	if ctx.Err() != nil && err == http.ErrServerClosed {
+	if ctx.Err() != nil && errors.Is(err, http.ErrServerClosed) {
 		return nil // ctx got canceled
 	}
 	return err
