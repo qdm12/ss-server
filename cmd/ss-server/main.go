@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
-	"io"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/qdm12/ss-server/internal/env"
 	"github.com/qdm12/ss-server/internal/log"
@@ -22,27 +22,56 @@ var (
 
 func main() {
 	ctx := context.Background()
+	ctx, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
+
 	environ := os.Environ()
-	os.Exit(_main(ctx, environ, os.Stdout))
-}
-
-func _main(ctx context.Context, environ []string, stdout io.Writer) int { //nolint:unparam
 	reader := env.NewReader(environ)
-	cipherName, password, port, logLevel, doProfiling :=
-		reader.CipherName(), reader.Password(), reader.Port(),
-		reader.LogLevel(), reader.Profiling()
+	logLevel := reader.LogLevel()
 
-	logger := log.New(logLevel, stdout)
+	logger := log.New(logLevel, os.Stdout)
 
 	logger.Info("Running version " + version + " built on " + date + " (" + commit + ")")
 
-	server, err := tcpudp.NewServer(cipherName, password, logger)
-	if err != nil {
+	errorCh := make(chan error)
+	go func() {
+		errorCh <- _main(ctx, logger, reader)
+	}()
+
+	select {
+	case <-ctx.Done():
+		logger.Warn("Caught OS signal, shutting down\n")
+		stop()
+	case err := <-errorCh:
+		close(errorCh)
+		if err == nil { // expected exit such as healthcheck
+			os.Exit(0)
+		}
 		logger.Error(err.Error())
-		return 1
 	}
 
-	ctx, cancel := context.WithCancel(ctx)
+	const shutdownGracePeriod = 5 * time.Second
+	timer := time.NewTimer(shutdownGracePeriod)
+	select {
+	case <-errorCh:
+		if !timer.Stop() {
+			<-timer.C
+		}
+		logger.Info("Shutdown successful")
+	case <-timer.C:
+		logger.Warn("Shutdown timed out")
+	}
+
+	os.Exit(1)
+}
+
+func _main(ctx context.Context, logger log.Logger, reader env.Reader) error {
+	cipherName, password, port, doProfiling :=
+		reader.CipherName(), reader.Password(), reader.Port(), reader.Profiling()
+
+	server, err := tcpudp.NewServer(cipherName, password, logger)
+	if err != nil {
+		return err
+	}
 
 	if doProfiling {
 		logger.Info("profiling server listening on :6060")
@@ -55,22 +84,5 @@ func _main(ctx context.Context, environ []string, stdout io.Writer) int { //noli
 		}()
 	}
 
-	errorCh := make(chan error)
-	go func() {
-		errorCh <- server.Listen(ctx, ":"+port)
-	}()
-
-	OSSignals := make(chan os.Signal, 1)
-	signal.Notify(OSSignals, syscall.SIGINT, syscall.SIGTERM)
-	select {
-	case err := <-errorCh:
-		logger.Error(err.Error())
-		cancel()
-	case signal := <-OSSignals:
-		logger.Info("Received OS signal " + signal.String())
-		cancel()
-		<-errorCh // wait for exit
-	}
-	close(errorCh)
-	return 1
+	return server.Listen(ctx, ":"+port)
 }
