@@ -16,7 +16,7 @@ func main() {
 		os.Exit(1)
 	}
 	ctx := context.Background()
-	if err := server.Listen(ctx, "0.0.0.0:8388"); err != nil {
+	if err := server.Listen(ctx, ":8388"); err != nil {
 		logger.Error(err.Error())
 	}
 }

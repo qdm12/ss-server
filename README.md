@@ -88,7 +88,7 @@ func main() {
 		os.Exit(1)
 	}
 	ctx := context.Background()
-	err = server.Listen(ctx, "0.0.0.0:8388") // blocking call, can be run in a goroutine
+	err = server.Listen(ctx, ":8388") // blocking call, can be run in a goroutine
 	if err != nil {
 		logger.Error(err.Error())
 	}
@@ -101,7 +101,7 @@ func (l *logger) Info(s string)  { fmt.Println("info:", s) }
 func (l *logger) Error(s string) { fmt.Println("error:", s) }
 ```
 
-The call to `server.Listen(ctx, "0.0.0.0:8388")` is blocking but you can run in a goroutine and cancel the context `ctx` when you want to stop the server.
+The call to `server.Listen(ctx, ":8388")` is blocking but you can run in a goroutine and cancel the context `ctx` when you want to stop the server.
 
 ### TCP only and UDP only
 
@@ -134,7 +134,7 @@ func Test(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish() // for Go < 1.14
 	server := mock_tcpudp.NewMockServer(ctrl)
-	server.EXPECT().Listen(context.Background(), "0.0.0.0:8388")
+	server.EXPECT().Listen(context.Background(), ":8388")
 	// more of your test using server
 }
 ```
