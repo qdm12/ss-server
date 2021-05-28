@@ -2,6 +2,8 @@
 
 Focuses on a Dockerized Shadowsocks server as well as giving an easy to use Go API to run a Shadowsocks server.
 
+<img height="200" src="title.svg?sanitize=true">
+
 ❓ Question, suggestion, request? ➡️ [Create an issue!](https://github.com/qdm12/ss-server/issues/new)
 
 [![Build status](https://github.com/qdm12/ss-server/workflows/Buildx%20latest/badge.svg)](https://github.com/qdm12/ss-server/actions?query=workflow%3A%22Buildx+latest%22)
