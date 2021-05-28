@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/signal"
 	"strings"
@@ -53,7 +52,7 @@ func _main(ctx context.Context, environment []string) int { //nolint:unparam
 
 	logger := log.NewLogger("", log.Level(logLevel))
 
-	logger.Info(fmt.Sprintf("Running version %s built on %s (%s)", Version, BuildDate, VcsRef))
+	logger.Info("Running version " + Version + " built on " + BuildDate + " (" + VcsRef + ")")
 
 	server, err := pkg.NewServer(cipherName, password, logger)
 	if err != nil {

@@ -85,7 +85,7 @@ func (s *server) Listen(ctx context.Context, address string) (err error) {
 
 		connection := NATMap.Get(remoteAddress.String())
 		if connection == nil {
-			s.logger.Info(fmt.Sprintf("UDP proxying %s to %s", remoteAddress, targetAddress))
+			s.logger.Info("UDP proxying " + remoteAddress.String() + " to " + targetAddress.String())
 			connection, err = net.ListenPacket("udp", "")
 			if err != nil {
 				s.logger.Info("cannot listen to UDP packet: " + err.Error())
@@ -97,7 +97,7 @@ func (s *server) Listen(ctx context.Context, address string) (err error) {
 
 		if _, err := connection.WriteTo(payload, targetUDPAddress); err != nil {
 			// accept only UDPAddr despite the signature
-			s.logger.Error(fmt.Sprintf("cannot write to UDP address %s: %s", targetUDPAddress, err))
+			s.logger.Error("cannot write to UDP address " + targetUDPAddress.String() + ": " + err.Error())
 		}
 	}
 }

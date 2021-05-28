@@ -86,7 +86,7 @@ func (s *server) Listen(ctx context.Context, address string) (err error) {
 	for len(serversRunning) > 0 {
 		select {
 		case serverExited := <-exited:
-			s.logger.Info(fmt.Sprintf("%s exited", serverExited))
+			s.logger.Info(serverExited + " exited")
 			delete(serversRunning, serverExited)
 		case <-timeoutCtx.Done():
 			for serverNotExited := range serversRunning {

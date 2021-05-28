@@ -90,12 +90,12 @@ func (s *server) handleConnection(connection net.Conn) {
 
 	rightConnection, err := net.Dial("tcp", targetAddress.String())
 	if err != nil {
-		s.logger.Error(fmt.Sprintf("cannot connect to target address %q: %s", targetAddress, err))
+		s.logger.Error("cannot connect to target address " + targetAddress.String() + ": " + err.Error())
 		return
 	}
 	defer rightConnection.Close()
 
-	s.logger.Info(fmt.Sprintf("TCP proxying %s to %s", connection.RemoteAddr(), targetAddress))
+	s.logger.Info("TCP proxying " + connection.RemoteAddr().String() + " to " + targetAddress.String())
 	if err := relay(shadowedConnection, rightConnection, s.timeNow); err != nil {
 		if err, ok := err.(net.Error); ok && err.Timeout() {
 			s.logger.Debug("TCP relay error: " + err.Error())
