@@ -75,12 +75,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/qdm12/ss-server/pkg"
+	"github.com/qdm12/ss-server/pkg/tcpudp"
 )
 
 func main() {
 	logger := &logger{}
-	server, err := pkg.NewServer("aes-256-gcm", "password", logger)
+	server, err := tcpudp.NewServer("aes-256-gcm", "password", logger)
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
@@ -124,14 +124,14 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/qdm12/ss-server/pkg/mock_pkg"
+	"github.com/qdm12/ss-server/pkg/tcpudp/mock_tcpudp"
 )
 
 func Test(t *testing.T) {
 	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish() // for Go < 1.14
-	server := mock_pkg.NewMockServer(ctrl)
+	server := mock_tcpudp.NewMockServer(ctrl)
 	server.EXPECT().Listen(context.Background(), "0.0.0.0:8388")
 	// more of your test using server
 }

@@ -10,7 +10,7 @@ import (
 	"github.com/qdm12/ss-server/internal/env"
 	"github.com/qdm12/ss-server/internal/log"
 	"github.com/qdm12/ss-server/internal/profiling"
-	"github.com/qdm12/ss-server/pkg"
+	"github.com/qdm12/ss-server/pkg/tcpudp"
 )
 
 //nolint: gochecknoglobals
@@ -36,7 +36,7 @@ func _main(ctx context.Context, environ []string, stdout io.Writer) int { //noli
 
 	logger.Info("Running version " + version + " built on " + date + " (" + commit + ")")
 
-	server, err := pkg.NewServer(cipherName, password, logger)
+	server, err := tcpudp.NewServer(cipherName, password, logger)
 	if err != nil {
 		logger.Error(err.Error())
 		return 1

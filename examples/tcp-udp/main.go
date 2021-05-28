@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/qdm12/ss-server/pkg"
+	"github.com/qdm12/ss-server/pkg/tcpudp"
 )
 
 func main() {
 	logger := &logger{}
-	server, err := pkg.NewServer("aes-256-gcm", "password", logger)
+	server, err := tcpudp.NewServer("aes-256-gcm", "password", logger)
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
