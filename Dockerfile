@@ -9,9 +9,6 @@ ARG GOLANGCI_LINT_VERSION=v1.40.1
 FROM --platform=${BUILDPLATFORM} qmcgaw/xcputranslate:${XCPUTRANSLATE_VERSION} AS xcputranslate
 FROM --platform=${BUILDPLATFORM} qmcgaw/binpot:golangci-lint-${GOLANGCI_LINT_VERSION} AS golangci-lint
 
-FROM alpine:${ALPINE_VERSION} AS alpine
-RUN apk --update add tzdata
-
 FROM --platform=${BUILDPLATFORM} golang:${GO_VERSION}-alpine${ALPINE_VERSION} AS base
 ENV CGO_ENABLED=0
 WORKDIR /tmp/gobuild
@@ -71,7 +68,6 @@ LABEL \
     org.opencontainers.image.source="https://github.com/qdm12/ss-server" \
     org.opencontainers.image.title="ss-server" \
     org.opencontainers.image.description="Shadowsocks server written in Go, aimed for Docker containers"
-COPY --from=alpine --chown=1000 /usr/share/zoneinfo /usr/share/zoneinfo
 ENV TZ= \
     LOG_LEVEL=INFO \
     PORT=8388 \

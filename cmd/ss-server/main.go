@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+	_ "time/tzdata"
 
 	"github.com/qdm12/ss-server/internal/env"
 	"github.com/qdm12/ss-server/internal/log"
