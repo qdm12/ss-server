@@ -23,12 +23,12 @@ linters:
     - gocritic
     - gocyclo
     - godot
+    - goerr113
     - goheader
     - goimports
     - gomnd
     - goprintffuncname
     - gosec
-    - goerr113
     - gosimple
     - govet
     - importas
@@ -42,8 +42,8 @@ linters:
     - nolintlint
     - prealloc
     - predeclared
+    - revive
     - rowserrcheck
-    - exportloopref
     - sqlclosecheck
     - staticcheck
     - structcheck
@@ -54,7 +54,6 @@ linters:
     - unparam
     - unused
     - varcheck
-    - wastedassign
     - whitespace
 
 run:
