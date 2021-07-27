@@ -11,20 +11,20 @@ import (
 	"github.com/qdm12/ss-server/pkg/udp"
 )
 
-//go:generate mockgen -destination=mock_$GOPACKAGE/$GOFILE . Server
+//go:generate mockgen -destination=mock_$GOPACKAGE/$GOFILE . Listener
 
-type Server interface {
+type Listener interface {
 	Listen(ctx context.Context, address string) (err error)
 }
 
-type server struct {
+type Server struct {
 	timeNow   func() time.Time
-	tcpServer tcp.Server
-	udpServer udp.Server
+	tcpServer tcp.Listener
+	udpServer udp.Listener
 	logger    log.Logger
 }
 
-func NewServer(cipherName, password string, logger log.Logger) (s Server, err error) {
+func NewServer(cipherName, password string, logger log.Logger) (s *Server, err error) {
 	tcpServer, err := tcp.NewServer(cipherName, password, logger)
 	if err != nil {
 		return nil, err
@@ -33,7 +33,7 @@ func NewServer(cipherName, password string, logger log.Logger) (s Server, err er
 	if err != nil {
 		return nil, err
 	}
-	return &server{
+	return &Server{
 		timeNow:   time.Now,
 		tcpServer: tcpServer,
 		udpServer: udpServer,
@@ -46,7 +46,7 @@ var (
 	ErrTCPServer = errors.New("TCP server crashed")
 )
 
-func (s *server) Listen(ctx context.Context, address string) (err error) {
+func (s *Server) Listen(ctx context.Context, address string) (err error) {
 	ctx, cancel := context.WithCancel(ctx)
 
 	serversRunning := map[string]struct{}{
@@ -96,5 +96,6 @@ func (s *server) Listen(ctx context.Context, address string) (err error) {
 			return err
 		}
 	}
+
 	return err
 }

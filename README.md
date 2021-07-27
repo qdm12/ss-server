@@ -114,7 +114,15 @@ Have also a look at the [cmd/ss-server/main.go](cmd/ss-server/main.go) which is 
 
 ### Testing
 
-Mocks are generated and committed to source control for each `Server` interface so you can directly use them with `gomock` for you tests. [For example](examples/test/main_test.go):
+Interfaces are defined such as `github.com/qdm12/ss-server/pkg/tcpudp.Listener`:
+
+```go
+type Listener interface {
+	Listen(ctx context.Context, address string) (err error)
+}
+```
+
+Mocks are generated and committed to source control for each interfaces so you can directly use them with `gomock` for you tests. [For example](examples/test/main_test.go):
 
 ```go
 package main
@@ -131,7 +139,7 @@ func Test(t *testing.T) {
 	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish() // for Go < 1.14
-	server := mock_tcpudp.NewMockServer(ctrl)
+	server := mock_tcpudp.NewMockListener(ctrl)
 	server.EXPECT().Listen(context.Background(), ":8388")
 	// more of your test using server
 }

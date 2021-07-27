@@ -11,32 +11,32 @@ import (
 	"github.com/qdm12/ss-server/pkg/log"
 )
 
-//go:generate mockgen -destination=mock_$GOPACKAGE/$GOFILE . Server
+//go:generate mockgen -destination=mock_$GOPACKAGE/$GOFILE . Listener
 
-type Server interface {
+type Listener interface {
 	Listen(ctx context.Context, address string) (err error)
 }
 
-func NewServer(cipherName, password string, logger log.Logger) (s Server, err error) {
+func NewServer(cipherName, password string, logger log.Logger) (s *Server, err error) {
 	udpPacketCipher, err := core.NewUDPPacketCipher(cipherName, password, filter.NewSaltFilter())
 	if err != nil {
 		return nil, err
 	}
-	return &server{
+	return &Server{
 		logger:          logger,
 		timeNow:         time.Now,
 		udpPacketCipher: udpPacketCipher,
 	}, nil
 }
 
-type server struct {
+type Server struct {
 	logger          log.Logger
 	timeNow         func() time.Time
 	udpPacketCipher core.UDPPacketCipher
 }
 
 // Listen listens on the address given for encrypted packets and does UDP NATing.
-func (s *server) Listen(ctx context.Context, address string) (err error) {
+func (s *Server) Listen(ctx context.Context, address string) (err error) {
 	listenConfig := net.ListenConfig{}
 	packetConnection, err := listenConfig.ListenPacket(ctx, "udp", address)
 	if err != nil {

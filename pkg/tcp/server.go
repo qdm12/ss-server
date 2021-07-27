@@ -14,32 +14,32 @@ import (
 	"github.com/qdm12/ss-server/pkg/log"
 )
 
-//go:generate mockgen -destination=mock_$GOPACKAGE/$GOFILE . Server
+//go:generate mockgen -destination=mock_$GOPACKAGE/$GOFILE . Listener
 
-type Server interface {
+type Listener interface {
 	Listen(ctx context.Context, address string) (err error)
 }
 
-func NewServer(cipherName, password string, logger log.Logger) (s Server, err error) {
+func NewServer(cipherName, password string, logger log.Logger) (s *Server, err error) {
 	tcpStreamCipher, err := core.NewTCPStreamCipher(cipherName, password, filter.NewSaltFilter())
 	if err != nil {
 		return nil, err
 	}
-	return &server{
+	return &Server{
 		logger:          logger,
 		timeNow:         time.Now,
 		tcpStreamCipher: tcpStreamCipher,
 	}, nil
 }
 
-type server struct {
+type Server struct {
 	logger          log.Logger
 	timeNow         func() time.Time
 	tcpStreamCipher core.TCPStreamCipher
 }
 
 // Listen listens on the address given for incoming connections.
-func (s *server) Listen(ctx context.Context, address string) (err error) {
+func (s *Server) Listen(ctx context.Context, address string) (err error) {
 	listenConfig := net.ListenConfig{}
 	listener, err := listenConfig.Listen(ctx, "tcp", address)
 	if err != nil {
@@ -74,7 +74,7 @@ func (s *server) Listen(ctx context.Context, address string) (err error) {
 	}
 }
 
-func (s *server) handleConnection(connection net.Conn) {
+func (s *Server) handleConnection(connection net.Conn) {
 	defer connection.Close()
 	shadowedConnection := s.tcpStreamCipher.Shadow(connection)
 	defer shadowedConnection.Close()
