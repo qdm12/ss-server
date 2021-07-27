@@ -35,4 +35,3 @@ jobs:
             -t qmcgaw/ss-server:${GITHUB_REF##*/} \
             --push \
             .
-      - run: curl -X POST https://hooks.microbadger.com/images/qmcgaw/ss-server/0SOGuNeMEYm9jAXxM0NTHK33D4o= || exit 0

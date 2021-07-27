@@ -14,8 +14,6 @@ Focuses on a Dockerized Shadowsocks server as well as giving an easy to use Go A
 [![GitHub commit activity](https://img.shields.io/github/commit-activity/y/qdm12/ss-server.svg)](https://github.com/qdm12/ss-server/issues)
 [![GitHub issues](https://img.shields.io/github/issues/qdm12/ss-server.svg)](https://github.com/qdm12/ss-server/issues)
 
-[![Image size](https://images.microbadger.com/badges/image/qmcgaw/ss-server.svg)](https://microbadger.com/images/qmcgaw/ss-server)
-[![Image version](https://images.microbadger.com/badges/version/qmcgaw/ss-server.svg)](https://microbadger.com/images/qmcgaw/ss-server)
 [![Join Slack channel](https://img.shields.io/badge/slack-@qdm12-yellow.svg?logo=slack)](https://join.slack.com/t/qdm12/shared_invite/enQtOTE0NjcxNTM1ODc5LTYyZmVlOTM3MGI4ZWU0YmJkMjUxNmQ4ODQ2OTAwYzMxMTlhY2Q1MWQyOWUyNjc2ODliNjFjMDUxNWNmNzk5MDk)
 
 ## Docker
