@@ -139,7 +139,7 @@ func ParseAddress(remoteAddress net.Addr) (socksAddress Address, err error) {
 		socksAddress[1] = byte(len(host))
 		copy(socksAddress[2:], host)
 	}
-	port, err := strconv.ParseUint(portStr, 10, 16)
+	port, err := strconv.ParseUint(portStr, 10, 16) //nolint:gomnd
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s: %s", errPortParse, portStr, err)
 	}
