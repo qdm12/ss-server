@@ -2,11 +2,11 @@
 
 Focuses on a Dockerized Shadowsocks server as well as giving an easy to use Go API to run a Shadowsocks server.
 
-<img height="200" src="title.svg?sanitize=true">
+<img height="200" src="title.svg">
 
 ❓ Question, suggestion, request? ➡️ [Create an issue!](https://github.com/qdm12/ss-server/issues/new)
 
-[![Build status](https://github.com/qdm12/ss-server/workflows/Buildx%20latest/badge.svg)](https://github.com/qdm12/ss-server/actions?query=workflow%3A%22Buildx+latest%22)
+[![Build status](https://github.com/qdm12/go-template/actions/workflows/ci.yml/badge.svg)](https://github.com/qdm12/go-template/actions/workflows/ci.yml)
 [![Docker Pulls](https://img.shields.io/docker/pulls/qmcgaw/ss-server.svg)](https://hub.docker.com/r/qmcgaw/ss-server)
 [![Docker Stars](https://img.shields.io/docker/stars/qmcgaw/ss-server.svg)](https://hub.docker.com/r/qmcgaw/ss-server)
 
@@ -21,7 +21,7 @@ Focuses on a Dockerized Shadowsocks server as well as giving an easy to use Go A
 The Docker image is:
 
 - Based on Scratch (no OS) for a total size of **3.53MB**
-- Compatible with `amd64`, `386` and all `arm` (i.e. raspberry pis)
+- Compatible with all the CPU architectures supported by Docker: `linux/amd64`, `linux/386`, `linux/arm64`, `linux/arm/v6`, `linux/arm/v7`, `linux/s390x`, `linux/ppc64le` and `linux/riscv64`
 - Shadowsocks is implemented in Go and compiled statically using Go 1.16
 
 Run the container interactively to try it out
