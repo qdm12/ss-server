@@ -154,13 +154,11 @@ func Test_Mytest(t *testing.T) {
 
 ## On demand
 
-- More CPU architectures, for example `s390x`
 - SIP003 plugins
 
 ## TODOS
 
 - Support hex raw keys instead of passwords
-- Readme svg icon
 - Entrypoint message
 - Prometheus stats
 - Docker healthcheck + healthcheck endpoint (i.e. for K8s)
