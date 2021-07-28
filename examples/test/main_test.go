@@ -8,11 +8,18 @@ import (
 	"github.com/qdm12/ss-server/pkg/tcpudp/mock_tcpudp"
 )
 
-func Test(t *testing.T) {
+func Test_Mytest(t *testing.T) {
 	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish() // for Go < 1.14
+
+	ctx := context.Background()
+
 	server := mock_tcpudp.NewMockListener(ctrl)
-	server.EXPECT().Listen(context.Background(), ":8388")
-	// more of your test using server
+	server.EXPECT().Listen(ctx, ":8388").Return(nil)
+
+	err := server.Listen(ctx, ":8388")
+	if err != nil {
+		t.Error("not expecting an error")
+	}
 }
