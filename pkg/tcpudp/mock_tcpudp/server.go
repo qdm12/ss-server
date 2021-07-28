@@ -35,15 +35,15 @@ func (m *MockListener) EXPECT() *MockListenerMockRecorder {
 }
 
 // Listen mocks base method.
-func (m *MockListener) Listen(arg0 context.Context, arg1 string) error {
+func (m *MockListener) Listen(arg0 context.Context) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Listen", arg0, arg1)
+	ret := m.ctrl.Call(m, "Listen", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Listen indicates an expected call of Listen.
-func (mr *MockListenerMockRecorder) Listen(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockListenerMockRecorder) Listen(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Listen", reflect.TypeOf((*MockListener)(nil).Listen), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Listen", reflect.TypeOf((*MockListener)(nil).Listen), arg0)
 }
