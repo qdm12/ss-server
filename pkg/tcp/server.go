@@ -19,31 +19,38 @@ import (
 var _ Listener = (*Server)(nil)
 
 type Listener interface {
-	Listen(ctx context.Context, address string) (err error)
+	Listen(ctx context.Context) (err error)
 }
 
-func NewServer(cipherName, password string, logger log.Logger) (s *Server, err error) {
-	tcpStreamCipher, err := core.NewTCPStreamCipher(cipherName, password, filter.NewBloomRing())
+func NewServer(settings Settings, logger log.Logger) (s *Server, err error) {
+	settings.setDefaults()
+
+	tcpStreamCipher, err := core.NewTCPStreamCipher(
+		settings.CipherName, settings.Password, filter.NewBloomRing())
 	if err != nil {
 		return nil, err
 	}
 	return &Server{
-		logger:   logger,
-		timeNow:  time.Now,
-		shadower: tcpStreamCipher,
+		address:      settings.Address,
+		logAddresses: settings.LogAddresses,
+		logger:       logger,
+		timeNow:      time.Now,
+		shadower:     tcpStreamCipher,
 	}, nil
 }
 
 type Server struct {
-	logger   log.Logger
-	timeNow  func() time.Time
-	shadower core.ConnShadower
+	address      string
+	logAddresses bool
+	logger       log.Logger
+	timeNow      func() time.Time
+	shadower     core.ConnShadower
 }
 
-// Listen listens on the address given for incoming connections.
-func (s *Server) Listen(ctx context.Context, address string) (err error) {
+// Listen listens for incoming connections.
+func (s *Server) Listen(ctx context.Context) (err error) {
 	listenConfig := net.ListenConfig{}
-	listener, err := listenConfig.Listen(ctx, "tcp", address)
+	listener, err := listenConfig.Listen(ctx, "tcp", s.address)
 	if err != nil {
 		return err
 	}
@@ -53,7 +60,7 @@ func (s *Server) Listen(ctx context.Context, address string) (err error) {
 			s.logger.Error(err.Error())
 		}
 	}()
-	s.logger.Info("listening TCP on " + address)
+	s.logger.Info("listening TCP on " + s.address)
 	for {
 		connection, err := listener.Accept()
 		if err != nil {
@@ -97,7 +104,10 @@ func (s *Server) handleConnection(connection net.Conn) {
 	}
 	defer rightConnection.Close()
 
-	s.logger.Info("TCP proxying " + connection.RemoteAddr().String() + " to " + targetAddress.String())
+	if s.logAddresses {
+		s.logger.Info("TCP proxying " + connection.RemoteAddr().String() + " to " + targetAddress.String())
+	}
+
 	if err := relay(shadowedConnection, rightConnection, s.timeNow); err != nil {
 		if err, ok := err.(net.Error); ok && err.Timeout() {
 			s.logger.Debug("TCP relay error: " + err.Error())

@@ -14,9 +14,9 @@ var ErrCipherNotSupported = errors.New("cipher is not supported")
 func deriveKey(password, cipherName string) (key []byte, err error) {
 	var keySize int
 	switch strings.ToLower(cipherName) {
-	case aes128gcm:
+	case AES128gcm:
 		keySize = 16
-	case chacha20IetfPoly1305, aes256gcm:
+	case Chacha20IetfPoly1305, AES256gcm:
 		keySize = 32
 	default:
 		return nil, fmt.Errorf("%w: %s", ErrCipherNotSupported, cipherName)

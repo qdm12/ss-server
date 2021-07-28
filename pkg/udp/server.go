@@ -16,31 +16,38 @@ import (
 var _ Listener = (*Server)(nil)
 
 type Listener interface {
-	Listen(ctx context.Context, address string) (err error)
+	Listen(ctx context.Context) (err error)
 }
 
-func NewServer(cipherName, password string, logger log.Logger) (s *Server, err error) {
-	udpPacketCipher, err := core.NewUDPPacketCipher(cipherName, password, filter.NewBloomRing())
+func NewServer(settings Settings, logger log.Logger) (s *Server, err error) {
+	settings.setDefaults()
+
+	udpPacketCipher, err := core.NewUDPPacketCipher(
+		settings.CipherName, settings.Password, filter.NewBloomRing())
 	if err != nil {
 		return nil, err
 	}
 	return &Server{
-		logger:   logger,
-		timeNow:  time.Now,
-		shadower: udpPacketCipher,
+		address:      settings.Address,
+		logAddresses: settings.LogAddresses,
+		logger:       logger,
+		timeNow:      time.Now,
+		shadower:     udpPacketCipher,
 	}, nil
 }
 
 type Server struct {
-	logger   log.Logger
-	timeNow  func() time.Time
-	shadower core.PacketConnShadower
+	address      string
+	logAddresses bool
+	logger       log.Logger
+	timeNow      func() time.Time
+	shadower     core.PacketConnShadower
 }
 
-// Listen listens on the address given for encrypted packets and does UDP NATing.
-func (s *Server) Listen(ctx context.Context, address string) (err error) {
+// Listen listens for encrypted packets and does UDP NATing.
+func (s *Server) Listen(ctx context.Context) (err error) {
 	listenConfig := net.ListenConfig{}
-	packetConnection, err := listenConfig.ListenPacket(ctx, "udp", address)
+	packetConnection, err := listenConfig.ListenPacket(ctx, "udp", s.address)
 	if err != nil {
 		return err
 	}
@@ -59,7 +66,7 @@ func (s *Server) Listen(ctx context.Context, address string) (err error) {
 
 	buffer := make([]byte, bufferSize)
 
-	s.logger.Info("listening UDP on " + address)
+	s.logger.Info("listening UDP on " + s.address)
 	for {
 		bytesRead, remoteAddress, err := packetConnection.ReadFrom(buffer)
 		if err != nil {
@@ -86,7 +93,10 @@ func (s *Server) Listen(ctx context.Context, address string) (err error) {
 
 		connection := NATMap.Get(remoteAddress.String())
 		if connection == nil {
-			s.logger.Info("UDP proxying " + remoteAddress.String() + " to " + targetAddress.String())
+			if s.logAddresses {
+				s.logger.Info("UDP proxying " + remoteAddress.String() + " to " + targetAddress.String())
+			}
+
 			connection, err = net.ListenPacket("udp", "")
 			if err != nil {
 				s.logger.Info("cannot listen to UDP packet: " + err.Error())

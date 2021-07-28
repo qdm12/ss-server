@@ -11,10 +11,12 @@ import (
 	"github.com/qdm12/ss-server/pkg/udp"
 )
 
+var _ Listener = (*Server)(nil)
+
 //go:generate mockgen -destination=mock_$GOPACKAGE/$GOFILE . Listener
 
 type Listener interface {
-	Listen(ctx context.Context, address string) (err error)
+	Listen(ctx context.Context) (err error)
 }
 
 type Server struct {
@@ -24,12 +26,15 @@ type Server struct {
 	logger    log.Logger
 }
 
-func NewServer(cipherName, password string, logger log.Logger) (s *Server, err error) {
-	tcpServer, err := tcp.NewServer(cipherName, password, logger)
+func NewServer(settings Settings, logger log.Logger) (s *Server, err error) {
+	settings.setDefaults()
+	settings.propagateToTCPAndUDP()
+
+	tcpServer, err := tcp.NewServer(settings.TCP, logger)
 	if err != nil {
 		return nil, err
 	}
-	udpServer, err := udp.NewServer(cipherName, password, logger)
+	udpServer, err := udp.NewServer(settings.UDP, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +51,7 @@ var (
 	ErrTCPServer = errors.New("TCP server crashed")
 )
 
-func (s *Server) Listen(ctx context.Context, address string) (err error) {
+func (s *Server) Listen(ctx context.Context) (err error) {
 	ctx, cancel := context.WithCancel(ctx)
 
 	serversRunning := map[string]struct{}{
@@ -58,14 +63,14 @@ func (s *Server) Listen(ctx context.Context, address string) (err error) {
 	// Launch TCP and UDP servers
 	errorCh := make(chan error)
 	go func() {
-		udpErr := s.udpServer.Listen(ctx, address)
+		udpErr := s.udpServer.Listen(ctx)
 		if ctx.Err() == nil && udpErr != nil {
 			errorCh <- fmt.Errorf("%w: %s", ErrUDPServer, udpErr)
 		}
 		exited <- "UDP server"
 	}()
 	go func() {
-		tcpErr := s.tcpServer.Listen(ctx, address)
+		tcpErr := s.tcpServer.Listen(ctx)
 		if ctx.Err() == nil && tcpErr != nil {
 			errorCh <- fmt.Errorf("%w: %s", ErrTCPServer, tcpErr)
 		}

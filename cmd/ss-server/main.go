@@ -69,7 +69,13 @@ func _main(ctx context.Context, logger log.Logger, reader env.ReaderInterface) e
 	cipherName, password, port, doProfiling :=
 		reader.CipherName(), reader.Password(), reader.Port(), reader.Profiling()
 
-	server, err := tcpudp.NewServer(cipherName, password, logger)
+	settings := tcpudp.Settings{
+		Address:    ":" + port,
+		CipherName: cipherName,
+		Password:   password,
+	}
+
+	server, err := tcpudp.NewServer(settings, logger)
 	if err != nil {
 		return err
 	}
@@ -85,5 +91,5 @@ func _main(ctx context.Context, logger log.Logger, reader env.ReaderInterface) e
 		}()
 	}
 
-	return server.Listen(ctx, ":"+port)
+	return server.Listen(ctx)
 }

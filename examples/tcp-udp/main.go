@@ -10,13 +10,18 @@ import (
 
 func main() {
 	logger := &logger{}
-	server, err := tcpudp.NewServer("aes-256-gcm", "password", logger)
+	settings := tcpudp.Settings{
+		Address:    ":8388",
+		CipherName: "aes-256-gcm",
+		Password:   "password",
+	}
+	server, err := tcpudp.NewServer(settings, logger)
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
 	}
 	ctx := context.Background()
-	err = server.Listen(ctx, ":8388") // blocking call, can be run in a goroutine
+	err = server.Listen(ctx) // blocking call, can be run in a goroutine
 	if err != nil {
 		logger.Error(err.Error())
 	}

@@ -10,13 +10,18 @@ import (
 
 func main() {
 	logger := &logger{}
-	server, err := udp.NewServer("aes-256-gcm", "password", logger)
+	settings := udp.Settings{
+		Address:    ":8388",
+		CipherName: "aes-256-gcm",
+		Password:   "password",
+	}
+	server, err := udp.NewServer(settings, logger)
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
 	}
 	ctx := context.Background()
-	if err := server.Listen(ctx, ":8388"); err != nil {
+	if err := server.Listen(ctx); err != nil {
 		logger.Error(err.Error())
 	}
 }

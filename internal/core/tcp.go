@@ -17,9 +17,9 @@ func NewTCPStreamCipher(name, password string, saltFilter filter.SaltFilter) (
 	}
 	var aead shadowaead.AEADCipher
 	switch strings.ToLower(name) {
-	case chacha20IetfPoly1305:
+	case Chacha20IetfPoly1305:
 		aead = shadowaead.Chacha20Poly1305(key)
-	case aes128gcm, aes256gcm:
+	case AES128gcm, AES256gcm:
 		aead = shadowaead.AESGCM(key)
 	default:
 		return nil, fmt.Errorf("%w: for TCP: %s", ErrCipherNotSupported, name)
