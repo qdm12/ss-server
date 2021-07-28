@@ -5,17 +5,17 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/qdm12/ss-server/pkg/tcp"
+	"github.com/qdm12/ss-server/pkg/udp"
 )
 
 func main() {
 	logger := &logger{}
-	settings := tcp.Settings{
+	settings := udp.Settings{
 		Address:    ":8388",
 		CipherName: "aes-256-gcm",
 		Password:   "password",
 	}
-	server, err := tcp.NewServer(settings, logger)
+	server, err := udp.NewServer(settings, logger)
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
