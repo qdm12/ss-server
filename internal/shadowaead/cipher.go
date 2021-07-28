@@ -11,21 +11,31 @@ import (
 	"golang.org/x/crypto/hkdf"
 )
 
+var _ AEADCipher = (*AEADCipherAdapter)(nil)
+
 type AEADCipher interface {
-	SaltSize() int
-	Crypter(salt []byte) (cipher.AEAD, error)
+	SaltSizeGetter
+	Crypter
 }
 
-type aeadCipherAdapter struct {
+type SaltSizeGetter interface {
+	GetSaltSize() int
+}
+
+type Crypter interface {
+	Crypt(salt []byte) (cipher.AEAD, error)
+}
+
+type AEADCipherAdapter struct {
 	preSharedKey  []byte
 	newAEADCipher func(key []byte) (cipher.AEAD, error)
 }
 
-func (c *aeadCipherAdapter) keySize() int {
+func (c *AEADCipherAdapter) keySize() int {
 	return len(c.preSharedKey)
 }
 
-func (c *aeadCipherAdapter) SaltSize() int {
+func (c *AEADCipherAdapter) GetSaltSize() int {
 	const minimumSaltSize = 16
 	if ks := c.keySize(); ks > minimumSaltSize {
 		return ks
@@ -33,7 +43,7 @@ func (c *aeadCipherAdapter) SaltSize() int {
 	return minimumSaltSize
 }
 
-func (c *aeadCipherAdapter) Crypter(salt []byte) (cipher.AEAD, error) {
+func (c *AEADCipherAdapter) Crypt(salt []byte) (cipher.AEAD, error) {
 	subkey := make([]byte, c.keySize())
 	const keyInfo = "ss-subkey"
 	reader := hkdf.New(sha1.New, c.preSharedKey, salt, []byte(keyInfo))
@@ -42,16 +52,16 @@ func (c *aeadCipherAdapter) Crypter(salt []byte) (cipher.AEAD, error) {
 }
 
 // Chacha20Poly1305 creates a new Cipher with a pre-shared key of 32 bytes.
-func Chacha20Poly1305(preSharedKey []byte) AEADCipher {
-	return &aeadCipherAdapter{
+func Chacha20Poly1305(preSharedKey []byte) *AEADCipherAdapter {
+	return &AEADCipherAdapter{
 		preSharedKey:  preSharedKey,
 		newAEADCipher: chacha20poly1305.New,
 	}
 }
 
 // AESGCM creates a new Cipher with a pre-shared key of 16 or 32 bytes.
-func AESGCM(preSharedKey []byte) AEADCipher {
-	return &aeadCipherAdapter{
+func AESGCM(preSharedKey []byte) *AEADCipherAdapter {
+	return &AEADCipherAdapter{
 		preSharedKey:  preSharedKey,
 		newAEADCipher: newAESGCM,
 	}

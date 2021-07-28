@@ -9,7 +9,8 @@ import (
 	"github.com/qdm12/ss-server/internal/shadowaead"
 )
 
-func NewTCPStreamCipher(name, password string, saltFilter filter.SaltFilter) (cipher TCPStreamCipher, err error) {
+func NewTCPStreamCipher(name, password string, saltFilter filter.SaltFilter) (
+	cipher *TCPStreamCipher, err error) {
 	key, err := deriveKey(password, name)
 	if err != nil {
 		return nil, err
@@ -23,21 +24,23 @@ func NewTCPStreamCipher(name, password string, saltFilter filter.SaltFilter) (ci
 	default:
 		return nil, fmt.Errorf("%w: for TCP: %s", ErrCipherNotSupported, name)
 	}
-	return &tcpStreamCipher{
+	return &TCPStreamCipher{
 		aead:       aead,
 		saltFilter: saltFilter,
 	}, nil
 }
 
-type TCPStreamCipher interface {
+var _ ConnShadower = (*TCPStreamCipher)(nil)
+
+type ConnShadower interface {
 	Shadow(connection net.Conn) net.Conn
 }
 
-type tcpStreamCipher struct {
+type TCPStreamCipher struct {
 	aead       shadowaead.AEADCipher
 	saltFilter filter.SaltFilter
 }
 
-func (c *tcpStreamCipher) Shadow(connection net.Conn) net.Conn {
+func (c *TCPStreamCipher) Shadow(connection net.Conn) net.Conn {
 	return shadowaead.NewConn(connection, c.aead, c.saltFilter)
 }

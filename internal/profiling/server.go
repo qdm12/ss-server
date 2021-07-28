@@ -8,16 +8,18 @@ import (
 	"time"
 )
 
-type ProfileServer interface {
+var _ Runner = (*ProfileServer)(nil)
+
+type Runner interface {
 	Run(ctx context.Context) error
 }
 
-type profileServer struct {
+type ProfileServer struct {
 	httpServer      *http.Server
 	onShutdownError func(err error)
 }
 
-func NewServer(onShutdownError func(err error)) ProfileServer {
+func NewServer(onShutdownError func(err error)) *ProfileServer {
 	mux := http.NewServeMux()
 	mux.Handle("/debug/pprof/", http.HandlerFunc(pprof.Index))
 	mux.Handle("/debug/pprof/cmdline", http.HandlerFunc(pprof.Cmdline))
@@ -25,13 +27,13 @@ func NewServer(onShutdownError func(err error)) ProfileServer {
 	mux.Handle("/debug/pprof/symbol", http.HandlerFunc(pprof.Symbol))
 	mux.Handle("/debug/pprof/trace", http.HandlerFunc(pprof.Trace))
 	httpServer := &http.Server{Addr: ":6060", Handler: mux}
-	return &profileServer{
+	return &ProfileServer{
 		httpServer:      httpServer,
 		onShutdownError: onShutdownError,
 	}
 }
 
-func (ps *profileServer) Run(ctx context.Context) error {
+func (ps *ProfileServer) Run(ctx context.Context) error {
 	go func() { // shutdown goroutine blocked by ctx
 		<-ctx.Done()
 		const timeoutDuration = 10 * time.Millisecond

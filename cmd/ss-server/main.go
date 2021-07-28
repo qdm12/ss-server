@@ -65,7 +65,7 @@ func main() {
 	os.Exit(1)
 }
 
-func _main(ctx context.Context, logger log.Logger, reader env.Reader) error {
+func _main(ctx context.Context, logger log.Logger, reader env.ReaderInterface) error {
 	cipherName, password, port, doProfiling :=
 		reader.CipherName(), reader.Password(), reader.Port(), reader.Profiling()
 

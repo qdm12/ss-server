@@ -195,14 +195,14 @@ type streamConn struct {
 }
 
 func (c *streamConn) initReader() error {
-	salt := make([]byte, c.aead.SaltSize())
+	salt := make([]byte, c.aead.GetSaltSize())
 	if _, err := io.ReadFull(c.Conn, salt); err != nil {
 		return err
 	}
 	if c.saltFilter.IsSaltRepeated(salt) {
 		return fmt.Errorf("%w: possible replay attack, dropping the packet", errRepeatedSalt)
 	}
-	aead, err := c.aead.Crypter(salt)
+	aead, err := c.aead.Crypt(salt)
 	if err != nil {
 		return err
 	}
@@ -231,11 +231,11 @@ func (c *streamConn) WriteTo(w io.Writer) (int64, error) {
 }
 
 func (c *streamConn) initWriter() error {
-	salt := make([]byte, c.aead.SaltSize())
+	salt := make([]byte, c.aead.GetSaltSize())
 	if _, err := io.ReadFull(rand.Reader, salt); err != nil {
 		return err
 	}
-	aead, err := c.aead.Crypter(salt)
+	aead, err := c.aead.Crypt(salt)
 	if err != nil {
 		return err
 	}

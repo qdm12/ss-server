@@ -9,7 +9,8 @@ import (
 	"github.com/qdm12/ss-server/internal/shadowaead"
 )
 
-func NewUDPPacketCipher(name, password string, saltFilter filter.SaltFilter) (cipher UDPPacketCipher, err error) {
+func NewUDPPacketCipher(name, password string, saltFilter filter.SaltFilter) (
+	cipher *UDPPacketCipher, err error) {
 	key, err := deriveKey(password, name)
 	if err != nil {
 		return nil, err
@@ -23,21 +24,23 @@ func NewUDPPacketCipher(name, password string, saltFilter filter.SaltFilter) (ci
 	default:
 		return nil, fmt.Errorf("%w: for UDP: %s", ErrCipherNotSupported, name)
 	}
-	return &udpPacketCipher{
+	return &UDPPacketCipher{
 		aead:       aead,
 		saltFilter: saltFilter,
 	}, nil
 }
 
-type UDPPacketCipher interface {
+var _ PacketConnShadower = (*UDPPacketCipher)(nil)
+
+type PacketConnShadower interface {
 	Shadow(connection net.PacketConn) net.PacketConn
 }
 
-type udpPacketCipher struct {
+type UDPPacketCipher struct {
 	aead       shadowaead.AEADCipher
 	saltFilter filter.SaltFilter
 }
 
-func (c *udpPacketCipher) Shadow(connection net.PacketConn) net.PacketConn {
+func (c *UDPPacketCipher) Shadow(connection net.PacketConn) net.PacketConn {
 	return shadowaead.NewPacketConn(connection, c.aead, c.saltFilter)
 }

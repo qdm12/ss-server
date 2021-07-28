@@ -51,7 +51,7 @@ func (c *cipherPacketConn) ReadFrom(b []byte) (int, net.Addr, error) {
 	if err != nil {
 		return n, address, err
 	}
-	bb, err := c.unpack(b[c.aead.SaltSize():], b[:n])
+	bb, err := c.unpack(b[c.aead.GetSaltSize():], b[:n])
 	if err != nil {
 		return n, address, err
 	}
@@ -62,13 +62,13 @@ func (c *cipherPacketConn) ReadFrom(b []byte) (int, net.Addr, error) {
 // pack encrypts a plaintext using the cipher provided, with a randomly generated salt and
 // returns a slice of dst containing the encrypted packet.
 func (c *cipherPacketConn) pack(dst, plaintext []byte) ([]byte, error) {
-	saltSize := c.aead.SaltSize()
+	saltSize := c.aead.GetSaltSize()
 	salt := dst[:saltSize]
 	if _, err := io.ReadFull(rand.Reader, salt); err != nil {
 		return nil, err
 	}
 
-	aead, err := c.aead.Crypter(salt)
+	aead, err := c.aead.Crypt(salt)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +89,7 @@ var (
 // unpack decrypts a packet using the cipher provided and returns a slice of dst containing
 // the decrypted packet.
 func (c *cipherPacketConn) unpack(dst, packet []byte) (plaintext []byte, err error) {
-	saltSize := c.aead.SaltSize()
+	saltSize := c.aead.GetSaltSize()
 	if len(packet) < saltSize {
 		return nil, fmt.Errorf("%w: %d bytes instead of minimum of %d bytes",
 			errPacketTooShort, len(packet), saltSize)
@@ -98,7 +98,7 @@ func (c *cipherPacketConn) unpack(dst, packet []byte) (plaintext []byte, err err
 	if c.saltFilter.IsSaltRepeated(salt) {
 		return nil, fmt.Errorf("%w: possible replay attack, dropping the packet", errRepeatedSalt)
 	}
-	aead, err := c.aead.Crypter(salt)
+	aead, err := c.aead.Crypt(salt)
 	if err != nil {
 		return nil, err
 	}

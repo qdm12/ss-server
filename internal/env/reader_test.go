@@ -5,7 +5,6 @@ import (
 
 	"github.com/qdm12/ss-server/internal/log"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func Test_NewReader(t *testing.T) {
@@ -13,16 +12,16 @@ func Test_NewReader(t *testing.T) {
 
 	testCases := map[string]struct {
 		environ        []string
-		expectedReader *reader
+		expectedReader *Reader
 	}{
 		"empty environ": {
-			expectedReader: &reader{
+			expectedReader: &Reader{
 				envKV: map[string]string{},
 			},
 		},
 		"two elements environ": {
 			environ: []string{"k1=v1", "k2=v2"},
-			expectedReader: &reader{
+			expectedReader: &Reader{
 				envKV: map[string]string{"k1": "v1", "k2": "v2"},
 			},
 		},
@@ -32,9 +31,7 @@ func Test_NewReader(t *testing.T) {
 		testCase := testCase
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			Reader := NewReader(testCase.environ)
-			reader, ok := Reader.(*reader)
-			require.True(t, ok)
+			reader := NewReader(testCase.environ)
 			assert.Equal(t, testCase.expectedReader, reader)
 		})
 	}
@@ -44,15 +41,15 @@ func Test_reader_CipherName(t *testing.T) {
 	t.Parallel()
 
 	testCases := map[string]struct {
-		reader     *reader
+		reader     *Reader
 		cipherName string
 	}{
 		"default": {
-			reader:     &reader{},
+			reader:     &Reader{},
 			cipherName: "chacha20-ietf-poly1305",
 		},
 		"set value": {
-			reader: &reader{
+			reader: &Reader{
 				envKV: map[string]string{"CIPHER": "value"},
 			},
 			cipherName: "value",
@@ -74,15 +71,15 @@ func Test_reader_Password(t *testing.T) {
 	t.Parallel()
 
 	testCases := map[string]struct {
-		reader   *reader
+		reader   *Reader
 		password string
 	}{
 		"default": {
-			reader:   &reader{},
+			reader:   &Reader{},
 			password: "password",
 		},
 		"set value": {
-			reader: &reader{
+			reader: &Reader{
 				envKV: map[string]string{"PASSWORD": "value"},
 			},
 			password: "value",
@@ -104,15 +101,15 @@ func Test_reader_Port(t *testing.T) {
 	t.Parallel()
 
 	testCases := map[string]struct {
-		reader *reader
+		reader *Reader
 		port   string
 	}{
 		"default": {
-			reader: &reader{},
+			reader: &Reader{},
 			port:   "8388",
 		},
 		"set value": {
-			reader: &reader{
+			reader: &Reader{
 				envKV: map[string]string{"PORT": "value"},
 			},
 			port: "value",
@@ -134,15 +131,15 @@ func Test_reader_LogLevel(t *testing.T) {
 	t.Parallel()
 
 	testCases := map[string]struct {
-		reader   *reader
+		reader   *Reader
 		logLevel log.Level
 	}{
 		"default": {
-			reader:   &reader{},
+			reader:   &Reader{},
 			logLevel: log.InfoLevel,
 		},
 		"set value": {
-			reader: &reader{
+			reader: &Reader{
 				envKV: map[string]string{"LOG_LEVEL": "value"},
 			},
 			logLevel: log.Level("value"),
@@ -164,19 +161,19 @@ func Test_reader_Profiling(t *testing.T) {
 	t.Parallel()
 
 	testCases := map[string]struct {
-		reader    *reader
+		reader    *Reader
 		profiling bool
 	}{
 		"default": {
-			reader: &reader{},
+			reader: &Reader{},
 		},
 		"not on": {
-			reader: &reader{
+			reader: &Reader{
 				envKV: map[string]string{"PROFILING": "off"},
 			},
 		},
 		"on": {
-			reader: &reader{
+			reader: &Reader{
 				envKV: map[string]string{"PROFILING": "on"},
 			},
 			profiling: true,

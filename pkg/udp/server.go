@@ -13,26 +13,28 @@ import (
 
 //go:generate mockgen -destination=mock_$GOPACKAGE/$GOFILE . Listener
 
+var _ Listener = (*Server)(nil)
+
 type Listener interface {
 	Listen(ctx context.Context, address string) (err error)
 }
 
 func NewServer(cipherName, password string, logger log.Logger) (s *Server, err error) {
-	udpPacketCipher, err := core.NewUDPPacketCipher(cipherName, password, filter.NewSaltFilter())
+	udpPacketCipher, err := core.NewUDPPacketCipher(cipherName, password, filter.NewBloomRing())
 	if err != nil {
 		return nil, err
 	}
 	return &Server{
-		logger:          logger,
-		timeNow:         time.Now,
-		udpPacketCipher: udpPacketCipher,
+		logger:   logger,
+		timeNow:  time.Now,
+		shadower: udpPacketCipher,
 	}, nil
 }
 
 type Server struct {
-	logger          log.Logger
-	timeNow         func() time.Time
-	udpPacketCipher core.UDPPacketCipher
+	logger   log.Logger
+	timeNow  func() time.Time
+	shadower core.PacketConnShadower
 }
 
 // Listen listens on the address given for encrypted packets and does UDP NATing.
@@ -48,7 +50,7 @@ func (s *Server) Listen(ctx context.Context, address string) (err error) {
 			s.logger.Error(err.Error())
 		}
 	}()
-	packetConnection = s.udpPacketCipher.Shadow(packetConnection)
+	packetConnection = s.shadower.Shadow(packetConnection)
 
 	NATMap := natmap{
 		remoteAddressToConnection: make(map[string]net.PacketConn),

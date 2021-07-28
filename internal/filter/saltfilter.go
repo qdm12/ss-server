@@ -13,18 +13,16 @@ const (
 	saltFilterSlotsNumber       = 10
 )
 
+var _ SaltFilter = (*BloomRing)(nil)
+
 // SaltFilter is used to mitigate replay attacks by detecting repeated salts.
 type SaltFilter interface {
 	AddSalt(b []byte)
 	IsSaltRepeated(b []byte) bool
 }
 
-func NewSaltFilter() SaltFilter {
-	return newBloomRing()
-}
-
-func newBloomRing() *bloomRing {
-	br := &bloomRing{
+func NewBloomRing() *BloomRing {
+	br := &BloomRing{
 		slotCapacity: saltFilterCapacity / saltFilterSlotsNumber,
 		slotCount:    saltFilterSlotsNumber,
 		slots:        make([]bloom.Filter, saltFilterSlotsNumber),
@@ -46,7 +44,7 @@ func doubleFNV(b []byte) (uint64, uint64) {
 	return x, y
 }
 
-type bloomRing struct {
+type BloomRing struct {
 	slotCapacity int
 	slotPosition int
 	slotCount    int
@@ -55,7 +53,7 @@ type bloomRing struct {
 	mu           sync.RWMutex
 }
 
-func (r *bloomRing) AddSalt(salt []byte) {
+func (r *BloomRing) AddSalt(salt []byte) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	slot := r.slots[r.slotPosition]
@@ -70,7 +68,7 @@ func (r *bloomRing) AddSalt(salt []byte) {
 	slot.Add(salt)
 }
 
-func (r *bloomRing) IsSaltRepeated(salt []byte) bool {
+func (r *BloomRing) IsSaltRepeated(salt []byte) bool {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	for _, s := range r.slots {

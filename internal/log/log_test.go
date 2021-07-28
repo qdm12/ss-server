@@ -14,19 +14,17 @@ func Test_New(t *testing.T) {
 	t.Parallel()
 	level := ErrorLevel
 	buffer := bytes.NewBuffer(nil)
-	intf := New(level, buffer)
-	impl, ok := intf.(*logger)
-	require.True(t, ok)
-	assert.Equal(t, level, impl.level)
-	assert.Equal(t, buffer, impl.logger.Writer())
-	assert.Equal(t, log.Ldate|log.Ltime|log.Lshortfile, impl.logger.Flags())
+	logger := New(level, buffer)
+	assert.Equal(t, level, logger.level)
+	assert.Equal(t, buffer, logger.logger.Writer())
+	assert.Equal(t, log.Ldate|log.Ltime|log.Lshortfile, logger.logger.Flags())
 }
 
-func Test_logger_log(t *testing.T) {
+func Test_SimpleLogger_log(t *testing.T) {
 	t.Parallel()
 
 	buffer := bytes.NewBuffer(nil)
-	logger := &logger{
+	logger := &SimpleLogger{
 		logger: log.New(buffer, "", 0),
 	}
 	logger.log(ErrorLevel, "test")
@@ -39,7 +37,7 @@ func Test_logger_log(t *testing.T) {
 	assert.Equal(t, expected, written)
 }
 
-func Test_logger_Debug(t *testing.T) {
+func Test_SimpleLogger_Debug(t *testing.T) {
 	t.Parallel()
 
 	const message = "test message"
@@ -69,7 +67,7 @@ func Test_logger_Debug(t *testing.T) {
 			t.Parallel()
 
 			buffer := bytes.NewBuffer(nil)
-			logger := &logger{
+			logger := &SimpleLogger{
 				logger: log.New(buffer, "", 0),
 				level:  testCase.level,
 			}
@@ -84,7 +82,7 @@ func Test_logger_Debug(t *testing.T) {
 	}
 }
 
-func Test_logger_Info(t *testing.T) {
+func Test_SimpleLogger_Info(t *testing.T) {
 	t.Parallel()
 
 	const message = "test message"
@@ -115,7 +113,7 @@ func Test_logger_Info(t *testing.T) {
 			t.Parallel()
 
 			buffer := bytes.NewBuffer(nil)
-			logger := &logger{
+			logger := &SimpleLogger{
 				logger: log.New(buffer, "", 0),
 				level:  testCase.level,
 			}
@@ -130,7 +128,7 @@ func Test_logger_Info(t *testing.T) {
 	}
 }
 
-func Test_logger_Warn(t *testing.T) {
+func Test_SimpleLogger_Warn(t *testing.T) {
 	t.Parallel()
 
 	const message = "test message"
@@ -162,7 +160,7 @@ func Test_logger_Warn(t *testing.T) {
 			t.Parallel()
 
 			buffer := bytes.NewBuffer(nil)
-			logger := &logger{
+			logger := &SimpleLogger{
 				logger: log.New(buffer, "", 0),
 				level:  testCase.level,
 			}
@@ -177,7 +175,7 @@ func Test_logger_Warn(t *testing.T) {
 	}
 }
 
-func Test_logger_Error(t *testing.T) {
+func Test_SimpleLogger_Error(t *testing.T) {
 	t.Parallel()
 
 	const message = "test message"
@@ -210,7 +208,7 @@ func Test_logger_Error(t *testing.T) {
 			t.Parallel()
 
 			buffer := bytes.NewBuffer(nil)
-			logger := &logger{
+			logger := &SimpleLogger{
 				logger: log.New(buffer, "", 0),
 				level:  testCase.level,
 			}

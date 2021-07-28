@@ -6,7 +6,9 @@ import (
 	"github.com/qdm12/ss-server/internal/log"
 )
 
-type Reader interface {
+var _ ReaderInterface = (*Reader)(nil)
+
+type ReaderInterface interface {
 	CipherName() (cipherName string)
 	Password() (password string)
 	Port() (port string)
@@ -14,11 +16,11 @@ type Reader interface {
 	Profiling() (profiling bool)
 }
 
-type reader struct {
+type Reader struct {
 	envKV map[string]string
 }
 
-func NewReader(environ []string) Reader {
+func NewReader(environ []string) *Reader {
 	kv := make(map[string]string, len(environ))
 	for _, s := range environ {
 		parts := strings.Split(s, "=")
@@ -27,12 +29,12 @@ func NewReader(environ []string) Reader {
 		kv[key] = value
 	}
 
-	return &reader{
+	return &Reader{
 		envKV: kv,
 	}
 }
 
-func (r *reader) CipherName() (cipherName string) {
+func (r *Reader) CipherName() (cipherName string) {
 	cipherName = r.envKV["CIPHER"]
 	if cipherName == "" {
 		const defaultCipherName = "chacha20-ietf-poly1305"
@@ -41,7 +43,7 @@ func (r *reader) CipherName() (cipherName string) {
 	return cipherName
 }
 
-func (r *reader) Password() (password string) {
+func (r *Reader) Password() (password string) {
 	password = r.envKV["PASSWORD"]
 	if password == "" {
 		const defaultPassword = "password"
@@ -50,7 +52,7 @@ func (r *reader) Password() (password string) {
 	return password
 }
 
-func (r *reader) Port() (port string) {
+func (r *Reader) Port() (port string) {
 	port = r.envKV["PORT"]
 	if port == "" {
 		const defaultPort = "8388"
@@ -59,7 +61,7 @@ func (r *reader) Port() (port string) {
 	return port
 }
 
-func (r *reader) LogLevel() (logLevel log.Level) {
+func (r *Reader) LogLevel() (logLevel log.Level) {
 	logLevel = log.Level(r.envKV["LOG_LEVEL"])
 	if logLevel == "" {
 		const defaultLogLevel = log.InfoLevel
@@ -68,6 +70,6 @@ func (r *reader) LogLevel() (logLevel log.Level) {
 	return logLevel
 }
 
-func (r *reader) Profiling() (profiling bool) {
+func (r *Reader) Profiling() (profiling bool) {
 	return strings.EqualFold(r.envKV["PROFILING"], "on")
 }
