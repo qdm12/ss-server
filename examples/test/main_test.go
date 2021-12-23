@@ -16,9 +16,9 @@ func Test_Mytest(t *testing.T) {
 	ctx := context.Background()
 
 	server := mock_tcpudp.NewMockListener(ctrl)
-	server.EXPECT().Listen(ctx, ":8388").Return(nil)
+	server.EXPECT().Listen(ctx).Return(nil)
 
-	err := server.Listen(ctx, ":8388")
+	err := server.Listen(ctx)
 	if err != nil {
 		t.Error("not expecting an error")
 	}
