@@ -3,7 +3,6 @@ package tcpudp
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/qdm12/ss-server/pkg/log"
@@ -54,52 +53,38 @@ var (
 func (s *Server) Listen(ctx context.Context) (err error) {
 	ctx, cancel := context.WithCancel(ctx)
 
-	serversRunning := map[string]struct{}{
-		"TCP server": {},
-		"UDP server": {},
-	}
-	exited := make(chan string)
+	tcpErrorCh := make(chan error)
+	udpErrorCh := make(chan error)
 
 	// Launch TCP and UDP servers
-	errorCh := make(chan error)
 	go func() {
-		udpErr := s.udpServer.Listen(ctx)
-		if ctx.Err() == nil && udpErr != nil {
-			errorCh <- fmt.Errorf("%w: %s", ErrUDPServer, udpErr)
-		}
-		exited <- "UDP server"
+		udpErrorCh <- s.udpServer.Listen(ctx)
 	}()
 	go func() {
-		tcpErr := s.tcpServer.Listen(ctx)
-		if ctx.Err() == nil && tcpErr != nil {
-			errorCh <- fmt.Errorf("%w: %s", ErrTCPServer, tcpErr)
-		}
-		exited <- "TCP server"
+		tcpErrorCh <- s.tcpServer.Listen(ctx)
 	}()
 
 	select {
-	case err = <-errorCh: // unexpected error
+	case err = <-tcpErrorCh:
+		s.logger.Info("TCP server exited")
+		cancel()
+		close(tcpErrorCh)
+		<-udpErrorCh
+		s.logger.Info("UDP server exited")
+		close(udpErrorCh)
+	case err = <-udpErrorCh:
+		s.logger.Info("UDP server exited")
+		cancel()
+		close(udpErrorCh)
+		<-tcpErrorCh
+		s.logger.Info("TCP server exited")
+		close(tcpErrorCh)
 	case <-ctx.Done(): // parent canceled on us
-	}
-	cancel() // stop the other server if an error occurred
-	close(errorCh)
-
-	const shutdownGracePeriod = 500 * time.Millisecond
-	timeoutCtx, timeoutCancel := context.WithTimeout(context.Background(), shutdownGracePeriod)
-	defer timeoutCancel()
-
-	for len(serversRunning) > 0 {
-		select {
-		case serverExited := <-exited:
-			s.logger.Info(serverExited + " exited")
-			delete(serversRunning, serverExited)
-		case <-timeoutCtx.Done():
-			for serverNotExited := range serversRunning {
-				s.logger.Error(serverNotExited + " did not exit during the " +
-					shutdownGracePeriod.String() + " shutdown grace period")
-			}
-			return err
-		}
+		cancel() // for the linter
+		<-udpErrorCh
+		<-tcpErrorCh
+		close(udpErrorCh)
+		close(tcpErrorCh)
 	}
 
 	return err
