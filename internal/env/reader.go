@@ -21,16 +21,16 @@ type Reader struct {
 }
 
 func NewReader(environ []string) *Reader {
-	kv := make(map[string]string, len(environ))
+	keyValue := make(map[string]string, len(environ))
 	for _, s := range environ {
 		parts := strings.Split(s, "=")
 		key := parts[0]
 		value := parts[1]
-		kv[key] = value
+		keyValue[key] = value
 	}
 
 	return &Reader{
-		envKV: kv,
+		envKV: keyValue,
 	}
 }
 

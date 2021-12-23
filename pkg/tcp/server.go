@@ -2,6 +2,7 @@ package tcp
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -109,7 +110,8 @@ func (s *Server) handleConnection(connection net.Conn) {
 	}
 
 	if err := relay(shadowedConnection, rightConnection, s.timeNow); err != nil {
-		if err, ok := err.(net.Error); ok && err.Timeout() {
+		var netErr net.Error
+		if ok := errors.As(err, &netErr); ok && netErr.Timeout() {
 			s.logger.Debug("TCP relay error: " + err.Error())
 			return // ignore i/o timeout
 		}

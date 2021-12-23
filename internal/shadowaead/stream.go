@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/cipher"
 	"crypto/rand"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -42,14 +43,14 @@ func (w *writer) ReadFrom(reader io.Reader) (n int64, err error) {
 	for {
 		buf := w.buffer
 		payloadBuf := buf[2+cipherOverhead : 2+cipherOverhead+payloadSizeMask]
-		nr, er := reader.Read(payloadBuf)
+		bytesRead, readErr := reader.Read(payloadBuf)
 
-		if nr > 0 {
-			n += int64(nr)
-			buf = buf[:2+cipherOverhead+nr+cipherOverhead]
-			payloadBuf = payloadBuf[:nr]
+		if bytesRead > 0 {
+			n += int64(bytesRead)
+			buf = buf[:2+cipherOverhead+bytesRead+cipherOverhead]
+			payloadBuf = payloadBuf[:bytesRead]
 			// big-endian payload size
-			buf[0], buf[1] = byte(nr>>8), byte(nr) //nolint:gomnd
+			buf[0], buf[1] = byte(bytesRead>>8), byte(bytesRead) //nolint:gomnd
 			w.cipher.Seal(buf[:0], w.nonce, buf[:2], nil)
 			increment(w.nonce)
 			w.cipher.Seal(payloadBuf[:0], w.nonce, payloadBuf, nil)
@@ -61,9 +62,10 @@ func (w *writer) ReadFrom(reader io.Reader) (n int64, err error) {
 			}
 		}
 
-		if er != nil {
-			if er != io.EOF { // ignore EOF as per io.ReaderFrom contract
-				err = er
+		if readErr != nil {
+			if !errors.Is(readErr, io.EOF) {
+				// ignore EOF as per io.ReaderFrom contract
+				err = readErr
 			}
 			break
 		}
@@ -159,7 +161,7 @@ func (r *reader) WriteTo(writer io.Writer) (n int64, err error) {
 			}
 		}
 		if readError != nil {
-			if readError == io.EOF {
+			if errors.Is(readError, io.EOF) {
 				return n, nil // ignore EOF error
 			}
 			return n, readError
@@ -221,13 +223,13 @@ func (c *streamConn) Read(b []byte) (int, error) {
 	return c.reader.Read(b)
 }
 
-func (c *streamConn) WriteTo(w io.Writer) (int64, error) {
+func (c *streamConn) WriteTo(writer io.Writer) (int64, error) {
 	if c.reader == nil {
 		if err := c.initReader(); err != nil {
 			return 0, err
 		}
 	}
-	return c.reader.WriteTo(w)
+	return c.reader.WriteTo(writer)
 }
 
 func (c *streamConn) initWriter() error {

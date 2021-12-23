@@ -2,6 +2,7 @@ package udp
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"time"
 
@@ -68,47 +69,56 @@ func (s *Server) Listen(ctx context.Context) (err error) {
 
 	s.logger.Info("listening UDP on " + s.address)
 	for {
-		bytesRead, remoteAddress, err := packetConnection.ReadFrom(buffer)
+		err = handleIncomingData(packetConnection, buffer,
+			&NATMap, s.logger, s.logAddresses)
 		if err != nil {
-			if ctxErr := ctx.Err(); ctxErr != nil {
+			ctxErr := ctx.Err()
+			if ctxErr != nil {
 				return ctxErr
 			}
-			s.logger.Error("cannot read from UDP buffer: " + err.Error())
-			continue
-		}
-
-		targetAddress, err := socks.ExtractAddress(buffer[:bytesRead])
-		if err != nil {
-			s.logger.Error("cannot extract target address: " + err.Error())
-			continue
-		}
-
-		targetUDPAddress, err := net.ResolveUDPAddr("udp", targetAddress.String())
-		if err != nil {
-			s.logger.Error("cannot resolve target UDP address: " + err.Error())
-			continue
-		}
-
-		payload := buffer[len(targetAddress):bytesRead]
-
-		connection := NATMap.Get(remoteAddress.String())
-		if connection == nil {
-			if s.logAddresses {
-				s.logger.Info("UDP proxying " + remoteAddress.String() + " to " + targetAddress.String())
-			}
-
-			connection, err = net.ListenPacket("udp", "")
-			if err != nil {
-				s.logger.Info("cannot listen to UDP packet: " + err.Error())
-				continue
-			}
-			NATMap.Set(remoteAddress.String(), connection)
-			go NATMap.Handle(remoteAddress, packetConnection, connection, s.logger)
-		}
-
-		if _, err := connection.WriteTo(payload, targetUDPAddress); err != nil {
-			// accept only UDPAddr despite the signature
-			s.logger.Error("cannot write to UDP address " + targetUDPAddress.String() + ": " + err.Error())
+			s.logger.Error(err.Error())
 		}
 	}
+}
+
+func handleIncomingData(packetConnection net.PacketConn, buffer []byte,
+	natMap *natmap, logger log.Logger, logAddresses bool) (err error) {
+	bytesRead, remoteAddress, err := packetConnection.ReadFrom(buffer)
+	if err != nil {
+		return fmt.Errorf("cannot read from UDP buffer: %w", err)
+	}
+
+	targetAddress, err := socks.ExtractAddress(buffer[:bytesRead])
+	if err != nil {
+		return fmt.Errorf("cannot extract target address: %w", err)
+	}
+
+	targetUDPAddress, err := net.ResolveUDPAddr("udp", targetAddress.String())
+	if err != nil {
+		return fmt.Errorf("cannot resolve target UDP address: %w", err)
+	}
+
+	payload := buffer[len(targetAddress):bytesRead]
+
+	connection := natMap.Get(remoteAddress.String())
+	if connection == nil {
+		if logAddresses {
+			logger.Info("UDP proxying " + remoteAddress.String() + " to " + targetAddress.String())
+		}
+
+		connection, err = net.ListenPacket("udp", "")
+		if err != nil {
+			return fmt.Errorf("cannot listen to UDP packet: %w", err)
+		}
+		natMap.Set(remoteAddress.String(), connection)
+		go natMap.Handle(remoteAddress, packetConnection, connection, logger)
+	}
+
+	_, err = connection.WriteTo(payload, targetUDPAddress)
+	if err != nil {
+		// accept only UDPAddr despite the signature
+		return fmt.Errorf("cannot write to UDP address %s: %w", targetUDPAddress, err)
+	}
+
+	return nil
 }

@@ -12,6 +12,6 @@ type Logger interface {
 	Error(s string)
 }
 
-func New() Logger {
+func New() Logger { //nolint:ireturn
 	return log.New(log.InfoLevel, os.Stdout)
 }

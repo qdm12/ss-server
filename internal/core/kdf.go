@@ -27,17 +27,17 @@ func deriveKey(password, cipherName string) (key []byte, err error) {
 // key derivation function from the original Shadowsocks spec based on md5.
 func kdf(password string, length int) (key []byte, err error) {
 	var b, prev []byte
-	h := md5.New() //nolint:gosec
+	hasher := md5.New() //nolint:gosec
 	for len(b) < length {
-		if _, err := h.Write(prev); err != nil {
+		if _, err := hasher.Write(prev); err != nil {
 			return nil, err
 		}
-		if _, err := h.Write([]byte(password)); err != nil {
+		if _, err := hasher.Write([]byte(password)); err != nil {
 			return nil, err
 		}
-		b = h.Sum(b)
-		prev = b[len(b)-h.Size():]
-		h.Reset()
+		b = hasher.Sum(b)
+		prev = b[len(b)-hasher.Size():]
+		hasher.Reset()
 	}
 	return b[:length], nil
 }

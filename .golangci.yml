@@ -4,17 +4,33 @@ linters-settings:
   misspell:
     locale: US
 
+issues:
+  exclude-rules:
+    - text: "variable name 'n' is too short for the scope of its usage"
+      linters:
+        - varnamelen
+    - text: "parameter name 'b' is too short for the scope of its usage"
+      linters:
+        - varnamelen
+    - text: "variable name 'ip' is too short for the scope of its usage"
+      linters:
+        - varnamelen
+
 linters:
   disable-all: true
   enable:
     - asciicheck
+    - bidichk
     - bodyclose
-    - deadcode
+    - cyclop
     - dogsled
     - dupl
-    - errcheck
+    - durationcheck
+    - errname
+    - errorlint
     - exhaustive
     - exportloopref
+    - forcetypeassert
     - gci
     - gochecknoglobals
     - gochecknoinits
@@ -27,33 +43,35 @@ linters:
     - goheader
     - goimports
     - gomnd
+    - gomoddirectives
     - goprintffuncname
     - gosec
-    - gosimple
-    - govet
+    - ifshort
     - importas
-    - ineffassign
+    - ireturn
     - lll
+    - makezero
     - misspell
     - nakedret
     - nestif
     - nilerr
+    - nilnil
     - noctx
     - nolintlint
     - prealloc
     - predeclared
+    - predeclared
+    - promlinter
     - revive
     - rowserrcheck
     - sqlclosecheck
-    - staticcheck
-    - structcheck
+    - tenv
     - thelper
     - tparallel
-    - typecheck
     - unconvert
     - unparam
-    - unused
-    - varcheck
+    - varnamelen
+    - wastedassign
     - whitespace
 
 run:

@@ -22,15 +22,15 @@ type SaltFilter interface {
 }
 
 func NewBloomRing() *BloomRing {
-	br := &BloomRing{
+	bloomRing := &BloomRing{
 		slotCapacity: saltFilterCapacity / saltFilterSlotsNumber,
 		slotCount:    saltFilterSlotsNumber,
 		slots:        make([]bloom.Filter, saltFilterSlotsNumber),
 	}
 	for i := 0; i < saltFilterSlotsNumber; i++ {
-		br.slots[i] = bloom.New(br.slotCapacity, saltFilterFalsePositiveRate, doubleFNV)
+		bloomRing.slots[i] = bloom.New(bloomRing.slotCapacity, saltFilterFalsePositiveRate, doubleFNV)
 	}
-	return br
+	return bloomRing
 }
 
 // Double FNV as the Bloom Filter hash.
