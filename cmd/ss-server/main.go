@@ -72,7 +72,7 @@ func _main(ctx context.Context, logger log.Logger, reader env.ReaderInterface) e
 	settings := tcpudp.Settings{
 		Address:    ":" + port,
 		CipherName: cipherName,
-		Password:   password,
+		Password:   &password,
 	}
 
 	server, err := tcpudp.NewServer(settings, logger)

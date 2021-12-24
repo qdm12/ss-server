@@ -10,10 +10,11 @@ import (
 
 func main() {
 	logger := &logger{}
+	password := "password"
 	settings := tcpudp.Settings{
 		Address:    ":8388",
 		CipherName: "aes-256-gcm",
-		Password:   "password",
+		Password:   &password,
 	}
 	server, err := tcpudp.NewServer(settings, logger)
 	if err != nil {

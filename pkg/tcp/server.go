@@ -24,16 +24,16 @@ type Listener interface {
 }
 
 func NewServer(settings Settings, logger log.Logger) (s *Server, err error) {
-	settings.setDefaults()
+	settings.SetDefaults()
 
 	tcpStreamCipher, err := core.NewTCPStreamCipher(
-		settings.CipherName, settings.Password, filter.NewBloomRing())
+		settings.CipherName, *settings.Password, filter.NewBloomRing())
 	if err != nil {
 		return nil, err
 	}
 	return &Server{
 		address:      settings.Address,
-		logAddresses: settings.LogAddresses,
+		logAddresses: *settings.LogAddresses,
 		logger:       logger,
 		timeNow:      time.Now,
 		shadower:     tcpStreamCipher,

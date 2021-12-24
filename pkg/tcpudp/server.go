@@ -26,8 +26,7 @@ type Server struct {
 }
 
 func NewServer(settings Settings, logger log.Logger) (s *Server, err error) {
-	settings.setDefaults()
-	settings.propagateToTCPAndUDP()
+	settings.SetDefaults()
 
 	tcpServer, err := tcp.NewServer(settings.TCP, logger)
 	if err != nil {

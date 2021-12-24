@@ -6,6 +6,9 @@ linters-settings:
 
 issues:
   exclude-rules:
+    - path: _test\.go
+      linters:
+        - dupl
     - text: "variable name 'n' is too short for the scope of its usage"
       linters:
         - varnamelen
