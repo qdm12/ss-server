@@ -15,8 +15,6 @@ import (
 	"github.com/qdm12/ss-server/pkg/log"
 )
 
-//go:generate mockgen -destination=mock_$GOPACKAGE/$GOFILE . Listener
-
 var _ Listener = (*Server)(nil)
 
 type Listener interface {

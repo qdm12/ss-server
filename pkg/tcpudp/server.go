@@ -12,8 +12,6 @@ import (
 
 var _ Listener = (*Server)(nil)
 
-//go:generate mockgen -destination=mock_$GOPACKAGE/$GOFILE . Listener
-
 type Listener interface {
 	Listen(ctx context.Context) (err error)
 }

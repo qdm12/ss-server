@@ -5,8 +5,9 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/qdm12/ss-server/pkg/tcpudp/mock_tcpudp"
 )
+
+//go:generate mockgen -destination=mock_tcpudp_listener_test.go -package $GOPACKAGE github.com/qdm12/ss-server/pkg/tcpudp Listener
 
 func Test_Mytest(t *testing.T) {
 	t.Parallel()
@@ -15,7 +16,7 @@ func Test_Mytest(t *testing.T) {
 
 	ctx := context.Background()
 
-	server := mock_tcpudp.NewMockListener(ctrl)
+	server := NewMockListener(ctrl)
 	server.EXPECT().Listen(ctx).Return(nil)
 
 	err := server.Listen(ctx)

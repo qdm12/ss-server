@@ -138,7 +138,9 @@ type Listener interface {
 }
 ```
 
-Mocks are generated and committed to source control for each interfaces so you can directly use them with `gomock` for you tests. [For example](examples/test/main_test.go):
+You can generate mocks in your codebase with for example [github.com/golang/mock](github.com/golang/mock) from these interfaces.
+
+[For example](examples/test/main_test.go):
 
 ```go
 package main
@@ -148,8 +150,9 @@ import (
     "testing"
 
     "github.com/golang/mock/gomock"
-    "github.com/qdm12/ss-server/pkg/tcpudp/mock_tcpudp"
 )
+
+//go:generate mockgen -destination=mock_tcpudp_listener_test.go -package $GOPACKAGE github.com/qdm12/ss-server/pkg/tcpudp Listener
 
 func Test_Mytest(t *testing.T) {
     t.Parallel()
@@ -158,7 +161,7 @@ func Test_Mytest(t *testing.T) {
 
     ctx := context.Background()
 
-    server := mock_tcpudp.NewMockListener(ctrl)
+    server := NewMockListener(ctrl)
     server.EXPECT().Listen(ctx, ":8388").Return(nil)
 
     err := server.Listen(ctx, ":8388")
@@ -167,6 +170,8 @@ func Test_Mytest(t *testing.T) {
     }
 }
 ```
+
+In this example, you can use `go generate ./...` to re-generate the mock from the `Listener` interface.
 
 ## On demand
 
