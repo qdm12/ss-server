@@ -17,7 +17,6 @@ issues:
         - varnamelen
 
 linters:
-  disable-all: true
   enable:
     - asciicheck
     - bidichk
