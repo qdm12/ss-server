@@ -3,22 +3,23 @@ version: "3.7"
 services:
   vscode:
     build: .
-    image: godevcontainer
     volumes:
       - ../:/workspace
+      # Docker
+      - ~/.docker:/root/.docker:z
       # Docker socket to access Docker server
       - /var/run/docker.sock:/var/run/docker.sock
-      # Docker configuration
-      - ~/.docker:/root/.docker:z
       # SSH directory for Linux, OSX and WSL
       - ~/.ssh:/root/.ssh:z
       # For Windows without WSL, a copy will be made
       # from /tmp/.ssh to ~/.ssh to fix permissions
-      #- ~/.ssh:/tmp/.ssh:ro
+      # - ~/.ssh:/tmp/.ssh:ro
       # Shell history persistence
       - ~/.zsh_history:/root/.zsh_history:z
       # Git config
       - ~/.gitconfig:/root/.gitconfig:z
+      # Kubernetes
+      - ~/.kube:/root/.kube:z
     environment:
       - TZ=
     cap_add:
@@ -27,8 +28,4 @@ services:
     security_opt:
       # For debugging with dlv
       - seccomp:unconfined
-    ports:
-      - 6060:6060/tcp
-      - 8388:8388/tcp
-      - 8388:8388/udp
-    entrypoint: zsh -c "while sleep 1000; do :; done"
+    entrypoint: [ "zsh", "-c", "while sleep 1000; do :; done" ]
