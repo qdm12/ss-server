@@ -1,6 +1,5 @@
 package shadowaead
 
-//nolint:gci
 import (
 	"crypto/aes"
 	"crypto/cipher"

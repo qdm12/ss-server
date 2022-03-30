@@ -1,6 +1,5 @@
 package core
 
-//nolint:gci
 import (
 	"crypto/md5" //nolint:gosec
 	"errors"
