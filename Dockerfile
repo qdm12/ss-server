@@ -22,19 +22,19 @@ COPY pkg/ ./pkg/
 COPY cmd/ ./cmd/
 COPY internal/ ./internal/
 
-FROM base AS test
+FROM --platform=${BUILDPLATFORM} base AS test
 # Note on the go race detector:
 # - we set CGO_ENABLED=1 to have it enabled
 # - we installed g++ in the base stage to support the race detector
 ENV CGO_ENABLED=1
 ENTRYPOINT go test -race -coverpkg=./... -coverprofile=coverage.txt -covermode=atomic ./...
 
-FROM base AS lint
+FROM --platform=${BUILDPLATFORM} base AS lint
 COPY .golangci.yml ./
 RUN golangci-lint run --timeout=10m
 
 
-FROM base AS mocks
+FROM --platform=${BUILDPLATFORM} base AS mocks
 RUN git init && \
     git config user.email ci@localhost && \
     git config user.name ci && \
@@ -46,7 +46,7 @@ RUN git init && \
     git diff --exit-code && \
     rm -rf .git/
 
-FROM base AS build
+FROM --platform=${BUILDPLATFORM} base AS build
 ARG TARGETPLATFORM
 ARG VERSION=unknown
 ARG CREATED="an unknown date"
