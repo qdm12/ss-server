@@ -45,7 +45,7 @@ func (ps *ProfileServer) Run(ctx context.Context) error {
 		const timeoutDuration = 10 * time.Millisecond
 		timeoutCtx, cancel := context.WithTimeout(context.Background(), timeoutDuration)
 		defer cancel()
-		if err := ps.httpServer.Shutdown(timeoutCtx); err != nil {
+		if err := ps.httpServer.Shutdown(timeoutCtx); err != nil { //nolint:contextcheck
 			ps.onShutdownError(err)
 		}
 	}()

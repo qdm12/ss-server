@@ -24,15 +24,21 @@ issues:
 
 linters:
   enable:
+    - asasalint
     - asciicheck
     - bidichk
     - bodyclose
+    - containedctx
+    - contextcheck
     - cyclop
+    - decorder
     - dogsled
     - dupl
     - durationcheck
+    - errchkjson
     - errname
     - errorlint
+    - execinquery
     - exhaustive
     - exportloopref
     - forcetypeassert
@@ -51,10 +57,12 @@ linters:
     - gomoddirectives
     - goprintffuncname
     - gosec
-    - ifshort
+    - grouper
     - importas
+    - interfacebloat
     - ireturn
     - lll
+    - maintidx
     - makezero
     - misspell
     - nakedret
@@ -63,10 +71,11 @@ linters:
     - nilnil
     - noctx
     - nolintlint
+    - nosprintfhostport
     - prealloc
     - predeclared
-    - predeclared
     - promlinter
+    - reassign
     - revive
     - rowserrcheck
     - sqlclosecheck
@@ -75,7 +84,7 @@ linters:
     - tparallel
     - unconvert
     - unparam
-    - varnamelen
+    - usestdlibvars
     - wastedassign
     - whitespace
 
