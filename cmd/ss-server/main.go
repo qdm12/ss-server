@@ -10,7 +10,8 @@ import (
 	_ "time/tzdata"
 
 	"github.com/qdm12/log"
-	"github.com/qdm12/ss-server/internal/env"
+	"github.com/qdm12/ss-server/internal/config/settings"
+	"github.com/qdm12/ss-server/internal/config/sources/env"
 	"github.com/qdm12/ss-server/internal/profiling"
 	"github.com/qdm12/ss-server/pkg/tcpudp"
 )
@@ -26,8 +27,7 @@ func main() {
 	ctx := context.Background()
 	ctx, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 
-	environ := os.Environ()
-	reader := env.NewReader(environ)
+	reader := env.New()
 
 	logger := log.New()
 
@@ -65,28 +65,32 @@ func main() {
 	os.Exit(1)
 }
 
-func _main(ctx context.Context, logger Logger, reader ReaderInterface) error {
-	logLevel, err := reader.LogLevel()
+func _main(ctx context.Context, logger Logger, settingsSource ReaderInterface) error {
+	settings, err := settingsSource.Read()
 	if err != nil {
-		return fmt.Errorf("reading log level: %w", err)
+		return fmt.Errorf("reading settings: %w", err)
 	}
-	logger.Patch(log.SetLevel(logLevel))
+	settings.SetDefaults()
 
-	cipherName, password, port, doProfiling :=
-		reader.CipherName(), reader.Password(), reader.Port(), reader.Profiling()
-
-	settings := tcpudp.Settings{
-		Address:    ":" + port,
-		CipherName: cipherName,
-		Password:   &password,
+	err = settings.Validate()
+	if err != nil {
+		return fmt.Errorf("validating settings: %w", err)
 	}
 
-	server, err := tcpudp.NewServer(settings, logger)
+	logger.Patch(log.SetLevel(*settings.LogLevel))
+
+	serverSettings := tcpudp.Settings{
+		Address:    ":" + fmt.Sprint(*settings.Port),
+		CipherName: settings.CipherName,
+		Password:   settings.Password,
+	}
+
+	server, err := tcpudp.NewServer(serverSettings, logger)
 	if err != nil {
 		return err
 	}
 
-	if doProfiling {
+	if *settings.Profiling {
 		logger.Info("profiling server listening on :6060")
 		onShutdownError := func(err error) { logger.Error(err.Error()) }
 		profileServer := profiling.NewServer(onShutdownError)
@@ -108,9 +112,5 @@ type Logger interface {
 }
 
 type ReaderInterface interface {
-	CipherName() (cipherName string)
-	Password() (password string)
-	Port() (port string)
-	LogLevel() (logLevel log.Level, err error)
-	Profiling() (profiling bool)
+	Read() (settings settings.Settings, err error)
 }
