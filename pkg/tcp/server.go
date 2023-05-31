@@ -84,9 +84,9 @@ func (s *Server) handleConnectionAsync(connection net.Conn) {
 }
 
 func (s *Server) handleConnection(connection net.Conn) (errs []error) {
-	defer closeConnection("TCP connection", connection, &errs)
-
 	shadowedConnection := s.shadower.Shadow(connection)
+	// Note closing the shadowed TCP connection closes the original
+	// TCP connection `connection`, so no need to close `connection` twice.
 	defer closeConnection("shadowed TCP connection", shadowedConnection, &errs)
 
 	targetAddress, err := socks.ReadAddress(shadowedConnection)
