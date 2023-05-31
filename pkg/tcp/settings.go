@@ -48,13 +48,14 @@ func (s Settings) Copy() (copied Settings) {
 	return copied
 }
 
-// MergeWith sets unset fields of the receiving settings
-// with field values from the other settings.
-func (s *Settings) MergeWith(other Settings) {
-	s.Address = gosettings.MergeWithString(s.Address, other.Address)
-	s.LogAddresses = gosettings.MergeWithPointer(s.LogAddresses, other.LogAddresses)
-	s.CipherName = gosettings.MergeWithString(s.CipherName, other.CipherName)
-	s.Password = gosettings.MergeWithPointer(s.Password, other.Password)
+// MergeWith returns the merge result of the receiver settings with
+// any unset fields set to the field of the other settings argument.
+func (s *Settings) MergeWith(other Settings) (result Settings) {
+	result.Address = gosettings.MergeWithString(s.Address, other.Address)
+	result.LogAddresses = gosettings.MergeWithPointer(s.LogAddresses, other.LogAddresses)
+	result.CipherName = gosettings.MergeWithString(s.CipherName, other.CipherName)
+	result.Password = gosettings.MergeWithPointer(s.Password, other.Password)
+	return result
 }
 
 // OverrideWith sets any field of the receiving settings

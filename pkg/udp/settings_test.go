@@ -170,11 +170,12 @@ func Test_Settings_MergeWith(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			settings := testCase.original
+			settings := testCase.original.Copy()
 
-			settings.MergeWith(testCase.other)
+			merged := settings.MergeWith(testCase.other)
 
-			assert.Equal(t, testCase.merged, settings)
+			assert.Equal(t, testCase.original, settings)
+			assert.Equal(t, testCase.merged, merged)
 		})
 	}
 }
