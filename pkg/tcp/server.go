@@ -51,7 +51,7 @@ func (s *Server) Listen(ctx context.Context) (err error) {
 			s.logger.Error(err.Error())
 		}
 	}()
-	s.logger.Info("listening TCP on " + s.address)
+	s.logger.Info("listening TCP on " + listener.Addr().String())
 	for {
 		connection, err := listener.Accept()
 		if err != nil {

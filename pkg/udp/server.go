@@ -58,7 +58,7 @@ func (s *Server) Listen(ctx context.Context) (err error) {
 
 	buffer := make([]byte, bufferSize)
 
-	s.logger.Info("listening UDP on " + s.address)
+	s.logger.Info("listening UDP on " + packetConnection.LocalAddr().String())
 	for {
 		err = handleIncomingData(packetConnection, buffer,
 			&NATMap, s.logger, s.logAddresses)
