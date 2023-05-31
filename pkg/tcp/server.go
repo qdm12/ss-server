@@ -12,7 +12,6 @@ import (
 	"github.com/qdm12/ss-server/internal/core"
 	"github.com/qdm12/ss-server/internal/filter"
 	"github.com/qdm12/ss-server/internal/socks"
-	"github.com/qdm12/ss-server/pkg/log"
 )
 
 var _ Listener = (*Server)(nil)
@@ -21,7 +20,7 @@ type Listener interface {
 	Listen(ctx context.Context) (err error)
 }
 
-func NewServer(settings Settings, logger log.Logger) (s *Server, err error) {
+func NewServer(settings Settings, logger Logger) (s *Server, err error) {
 	settings.SetDefaults()
 
 	tcpStreamCipher, err := core.NewTCPStreamCipher(
@@ -41,7 +40,7 @@ func NewServer(settings Settings, logger log.Logger) (s *Server, err error) {
 type Server struct {
 	address      string
 	logAddresses bool
-	logger       log.Logger
+	logger       Logger
 	timeNow      func() time.Time
 	shadower     core.ConnShadower
 }

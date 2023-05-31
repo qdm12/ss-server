@@ -9,7 +9,6 @@ import (
 	"github.com/qdm12/ss-server/internal/core"
 	"github.com/qdm12/ss-server/internal/filter"
 	"github.com/qdm12/ss-server/internal/socks"
-	"github.com/qdm12/ss-server/pkg/log"
 )
 
 var _ Listener = (*Server)(nil)
@@ -18,7 +17,7 @@ type Listener interface {
 	Listen(ctx context.Context) (err error)
 }
 
-func NewServer(settings Settings, logger log.Logger) (s *Server, err error) {
+func NewServer(settings Settings, logger Logger) (s *Server, err error) {
 	settings.SetDefaults()
 
 	udpPacketCipher, err := core.NewUDPPacketCipher(
@@ -38,7 +37,7 @@ func NewServer(settings Settings, logger log.Logger) (s *Server, err error) {
 type Server struct {
 	address      string
 	logAddresses bool
-	logger       log.Logger
+	logger       Logger
 	timeNow      func() time.Time
 	shadower     core.PacketConnShadower
 }
@@ -80,7 +79,7 @@ func (s *Server) Listen(ctx context.Context) (err error) {
 }
 
 func handleIncomingData(packetConnection net.PacketConn, buffer []byte,
-	natMap *natmap, logger log.Logger, logAddresses bool) (err error) {
+	natMap *natmap, logger Logger, logAddresses bool) (err error) {
 	bytesRead, remoteAddress, err := packetConnection.ReadFrom(buffer)
 	if err != nil {
 		return fmt.Errorf("cannot read from UDP buffer: %w", err)
@@ -109,7 +108,7 @@ func handleIncomingData(packetConnection net.PacketConn, buffer []byte,
 			return fmt.Errorf("cannot listen to UDP packet: %w", err)
 		}
 		natMap.Set(remoteAddress.String(), connection)
-		go natMap.Handle(remoteAddress, packetConnection, connection, logger)
+		go natMap.Handle(remoteAddress, packetConnection, connection)
 	}
 
 	_, err = connection.WriteTo(payload, targetUDPAddress)

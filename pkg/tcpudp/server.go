@@ -5,7 +5,6 @@ import (
 	"errors"
 	"time"
 
-	"github.com/qdm12/ss-server/pkg/log"
 	"github.com/qdm12/ss-server/pkg/tcp"
 	"github.com/qdm12/ss-server/pkg/udp"
 )
@@ -20,10 +19,10 @@ type Server struct {
 	timeNow   func() time.Time
 	tcpServer tcp.Listener
 	udpServer udp.Listener
-	logger    log.Logger
+	logger    Logger
 }
 
-func NewServer(settings Settings, logger log.Logger) (s *Server, err error) {
+func NewServer(settings Settings, logger Logger) (s *Server, err error) {
 	settings.SetDefaults()
 
 	tcpServer, err := tcp.NewServer(settings.TCP, logger)

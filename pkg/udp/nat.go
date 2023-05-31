@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/qdm12/ss-server/internal/socks"
-	"github.com/qdm12/ss-server/pkg/log"
 )
 
 // Packet NAT table.
@@ -28,7 +27,7 @@ func (nm *natmap) Set(key string, packetConnection net.PacketConn) {
 	nm.remoteAddressToConnection[key] = packetConnection
 }
 
-func (nm *natmap) Handle(peer net.Addr, dst, src net.PacketConn, logger log.Logger) {
+func (nm *natmap) Handle(peer net.Addr, dst, src net.PacketConn) {
 	_ = timedCopy(dst, peer, src, nm.timeNow)
 	key := peer.String()
 	nm.mu.Lock()
