@@ -11,7 +11,7 @@ import (
 	"github.com/qdm12/ss-server/internal/filter"
 )
 
-//nolint: gochecknoglobals
+//nolint:gochecknoglobals
 var zeroNonce [128]byte // read-only zerored array
 
 type cipherPacketConn struct {

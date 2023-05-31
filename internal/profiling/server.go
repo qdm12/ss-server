@@ -26,7 +26,13 @@ func NewServer(onShutdownError func(err error)) *ProfileServer {
 	mux.Handle("/debug/pprof/profile", http.HandlerFunc(pprof.Profile))
 	mux.Handle("/debug/pprof/symbol", http.HandlerFunc(pprof.Symbol))
 	mux.Handle("/debug/pprof/trace", http.HandlerFunc(pprof.Trace))
-	httpServer := &http.Server{Addr: ":6060", Handler: mux}
+	const readTimeout = 10 * time.Minute
+	httpServer := &http.Server{
+		Addr:              ":6060",
+		Handler:           mux,
+		ReadTimeout:       readTimeout,
+		ReadHeaderTimeout: time.Second,
+	}
 	return &ProfileServer{
 		httpServer:      httpServer,
 		onShutdownError: onShutdownError,

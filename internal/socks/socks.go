@@ -139,9 +139,9 @@ func ParseAddress(remoteAddress net.Addr) (socksAddress Address, err error) {
 		socksAddress[1] = byte(len(host))
 		copy(socksAddress[2:], host)
 	}
-	port, err := strconv.ParseUint(portStr, 10, 16) //nolint:gomnd
+	port, err := strconv.ParseUint(portStr, 10, 16)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %s: %s", errPortParse, portStr, err)
+		return nil, fmt.Errorf("%w: %s: %w", errPortParse, portStr, err)
 	}
 	socksAddress[len(socksAddress)-2] = byte(port >> 8) //nolint:gomnd
 	socksAddress[len(socksAddress)-1] = byte(port)

@@ -14,7 +14,7 @@ import (
 	"github.com/qdm12/ss-server/pkg/tcpudp"
 )
 
-//nolint: gochecknoglobals
+//nolint:gochecknoglobals
 var (
 	version = "unknown"
 	date    = "unknown"

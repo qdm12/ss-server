@@ -17,12 +17,12 @@ var (
 func ValidateAddress(address string) (err error) {
 	_, portStr, err := net.SplitHostPort(address)
 	if err != nil {
-		return fmt.Errorf("%w: %s", ErrListenAddressNotValid, err)
+		return fmt.Errorf("%w: %w", ErrListenAddressNotValid, err)
 	}
 
 	portInt, err := strconv.Atoi(portStr)
 	if err != nil {
-		return fmt.Errorf("%w: %s", ErrListenPortNotValid, err)
+		return fmt.Errorf("%w: %w", ErrListenPortNotValid, err)
 	}
 	if portInt < 0 || portInt > 65535 {
 		return fmt.Errorf("%w: %d: must be between 0 and 65535",

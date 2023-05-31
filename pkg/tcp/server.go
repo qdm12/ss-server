@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	"time"
 
@@ -89,7 +88,7 @@ func (s *Server) handleConnection(connection net.Conn) {
 	targetAddress, err := socks.ReadAddress(shadowedConnection)
 	if err != nil {
 		s.logger.Error("cannot obtain target address: " + err.Error())
-		if _, err := io.Copy(ioutil.Discard, connection); err != nil {
+		if _, err := io.Copy(io.Discard, connection); err != nil {
 			s.logger.Error(err.Error())
 		}
 		return
