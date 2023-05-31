@@ -12,8 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func boolPtr(t bool) *bool       { return &t }
-func stringPtr(s string) *string { return &s }
+func ptrTo[T any](x T) *T { return &x }
 
 func Test_Settings_SetDefaults(t *testing.T) {
 	t.Parallel()
@@ -25,58 +24,58 @@ func Test_Settings_SetDefaults(t *testing.T) {
 		"empty settings": {
 			expected: Settings{
 				Address:      ":8388",
-				LogAddresses: boolPtr(false),
+				LogAddresses: ptrTo(false),
 				CipherName:   core.Chacha20IetfPoly1305,
-				Password:     stringPtr(""),
+				Password:     ptrTo(""),
 				TCP: tcp.Settings{
 					Address:      ":8388",
-					LogAddresses: boolPtr(false),
+					LogAddresses: ptrTo(false),
 					CipherName:   core.Chacha20IetfPoly1305,
-					Password:     stringPtr(""),
+					Password:     ptrTo(""),
 				},
 				UDP: udp.Settings{
 					Address:      ":8388",
-					LogAddresses: boolPtr(false),
+					LogAddresses: ptrTo(false),
 					CipherName:   core.Chacha20IetfPoly1305,
-					Password:     stringPtr(""),
+					Password:     ptrTo(""),
 				},
 			},
 		},
 		"already set settings": {
 			initial: Settings{
 				Address:      ":0",
-				LogAddresses: boolPtr(true),
+				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
-				Password:     stringPtr("password"),
+				Password:     ptrTo("password"),
 				TCP: tcp.Settings{
 					Address:      ":8388",
-					LogAddresses: boolPtr(true),
+					LogAddresses: ptrTo(true),
 					CipherName:   core.Chacha20IetfPoly1305,
-					Password:     stringPtr("tcp"),
+					Password:     ptrTo("tcp"),
 				},
 				UDP: udp.Settings{
 					Address:      ":8388",
-					LogAddresses: boolPtr(false),
+					LogAddresses: ptrTo(false),
 					CipherName:   core.Chacha20IetfPoly1305,
-					Password:     stringPtr("udp"),
+					Password:     ptrTo("udp"),
 				},
 			},
 			expected: Settings{
 				Address:      ":0",
-				LogAddresses: boolPtr(true),
+				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
-				Password:     stringPtr("password"),
+				Password:     ptrTo("password"),
 				TCP: tcp.Settings{
 					Address:      ":8388",
-					LogAddresses: boolPtr(true),
+					LogAddresses: ptrTo(true),
 					CipherName:   core.Chacha20IetfPoly1305,
-					Password:     stringPtr("tcp"),
+					Password:     ptrTo("tcp"),
 				},
 				UDP: udp.Settings{
 					Address:      ":8388",
-					LogAddresses: boolPtr(false),
+					LogAddresses: ptrTo(false),
 					CipherName:   core.Chacha20IetfPoly1305,
-					Password:     stringPtr("udp"),
+					Password:     ptrTo("udp"),
 				},
 			},
 		},
@@ -107,38 +106,38 @@ func Test_Settings_Copy(t *testing.T) {
 		"non empty settings": {
 			original: Settings{
 				Address:      ":0",
-				LogAddresses: boolPtr(true),
+				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
-				Password:     stringPtr("password"),
+				Password:     ptrTo("password"),
 				TCP: tcp.Settings{
 					Address:      ":8388",
-					LogAddresses: boolPtr(true),
+					LogAddresses: ptrTo(true),
 					CipherName:   core.Chacha20IetfPoly1305,
-					Password:     stringPtr("tcp"),
+					Password:     ptrTo("tcp"),
 				},
 				UDP: udp.Settings{
 					Address:      ":8388",
-					LogAddresses: boolPtr(false),
+					LogAddresses: ptrTo(false),
 					CipherName:   core.Chacha20IetfPoly1305,
-					Password:     stringPtr("udp"),
+					Password:     ptrTo("udp"),
 				},
 			},
 			copied: Settings{
 				Address:      ":0",
-				LogAddresses: boolPtr(true),
+				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
-				Password:     stringPtr("password"),
+				Password:     ptrTo("password"),
 				TCP: tcp.Settings{
 					Address:      ":8388",
-					LogAddresses: boolPtr(true),
+					LogAddresses: ptrTo(true),
 					CipherName:   core.Chacha20IetfPoly1305,
-					Password:     stringPtr("tcp"),
+					Password:     ptrTo("tcp"),
 				},
 				UDP: udp.Settings{
 					Address:      ":8388",
-					LogAddresses: boolPtr(false),
+					LogAddresses: ptrTo(false),
 					CipherName:   core.Chacha20IetfPoly1305,
-					Password:     stringPtr("udp"),
+					Password:     ptrTo("udp"),
 				},
 			},
 		},
@@ -180,9 +179,9 @@ func Test_Settings_MergeWith(t *testing.T) {
 		"settings with empty other": {
 			original: Settings{
 				Address:      ":1",
-				LogAddresses: boolPtr(true),
+				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
-				Password:     stringPtr("password"),
+				Password:     ptrTo("password"),
 				TCP: tcp.Settings{
 					Address: ":2",
 				},
@@ -192,9 +191,9 @@ func Test_Settings_MergeWith(t *testing.T) {
 			},
 			merged: Settings{
 				Address:      ":1",
-				LogAddresses: boolPtr(true),
+				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
-				Password:     stringPtr("password"),
+				Password:     ptrTo("password"),
 				TCP: tcp.Settings{
 					Address: ":2",
 				},
@@ -206,9 +205,9 @@ func Test_Settings_MergeWith(t *testing.T) {
 		"settings with other": {
 			original: Settings{
 				Address:      ":1",
-				LogAddresses: boolPtr(true),
+				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
-				Password:     stringPtr("password"),
+				Password:     ptrTo("password"),
 				TCP: tcp.Settings{
 					Address: ":2",
 				},
@@ -218,9 +217,9 @@ func Test_Settings_MergeWith(t *testing.T) {
 			},
 			other: Settings{
 				Address:      ":6",
-				LogAddresses: boolPtr(false),
+				LogAddresses: ptrTo(false),
 				CipherName:   core.AES256gcm,
-				Password:     stringPtr("password2"),
+				Password:     ptrTo("password2"),
 				TCP: tcp.Settings{
 					Address: ":7",
 				},
@@ -230,9 +229,9 @@ func Test_Settings_MergeWith(t *testing.T) {
 			},
 			merged: Settings{
 				Address:      ":1",
-				LogAddresses: boolPtr(true),
+				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
-				Password:     stringPtr("password"),
+				Password:     ptrTo("password"),
 				TCP: tcp.Settings{
 					Address: ":2",
 				},
@@ -244,9 +243,9 @@ func Test_Settings_MergeWith(t *testing.T) {
 		"empty settings with other": {
 			other: Settings{
 				Address:      ":1",
-				LogAddresses: boolPtr(true),
+				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
-				Password:     stringPtr("password"),
+				Password:     ptrTo("password"),
 				TCP: tcp.Settings{
 					Address: ":2",
 				},
@@ -256,9 +255,9 @@ func Test_Settings_MergeWith(t *testing.T) {
 			},
 			merged: Settings{
 				Address:      ":1",
-				LogAddresses: boolPtr(true),
+				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
-				Password:     stringPtr("password"),
+				Password:     ptrTo("password"),
 				TCP: tcp.Settings{
 					Address: ":2",
 				},
@@ -296,9 +295,9 @@ func Test_Settings_OverrideWith(t *testing.T) {
 		"settings with empty other": {
 			original: Settings{
 				Address:      ":1",
-				LogAddresses: boolPtr(true),
+				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
-				Password:     stringPtr("password"),
+				Password:     ptrTo("password"),
 				TCP: tcp.Settings{
 					Address: ":2",
 				},
@@ -308,9 +307,9 @@ func Test_Settings_OverrideWith(t *testing.T) {
 			},
 			overidden: Settings{
 				Address:      ":1",
-				LogAddresses: boolPtr(true),
+				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
-				Password:     stringPtr("password"),
+				Password:     ptrTo("password"),
 				TCP: tcp.Settings{
 					Address: ":2",
 				},
@@ -322,9 +321,9 @@ func Test_Settings_OverrideWith(t *testing.T) {
 		"settings with other": {
 			original: Settings{
 				Address:      ":1",
-				LogAddresses: boolPtr(true),
+				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
-				Password:     stringPtr("password"),
+				Password:     ptrTo("password"),
 				TCP: tcp.Settings{
 					Address: ":2",
 				},
@@ -334,9 +333,9 @@ func Test_Settings_OverrideWith(t *testing.T) {
 			},
 			other: Settings{
 				Address:      ":6",
-				LogAddresses: boolPtr(true),
+				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
-				Password:     stringPtr("password"),
+				Password:     ptrTo("password"),
 				TCP: tcp.Settings{
 					Address: ":7",
 				},
@@ -346,9 +345,9 @@ func Test_Settings_OverrideWith(t *testing.T) {
 			},
 			overidden: Settings{
 				Address:      ":6",
-				LogAddresses: boolPtr(true),
+				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
-				Password:     stringPtr("password"),
+				Password:     ptrTo("password"),
 				TCP: tcp.Settings{
 					Address: ":7",
 				},
@@ -360,9 +359,9 @@ func Test_Settings_OverrideWith(t *testing.T) {
 		"empty settings with other": {
 			other: Settings{
 				Address:      ":1",
-				LogAddresses: boolPtr(true),
+				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
-				Password:     stringPtr("password"),
+				Password:     ptrTo("password"),
 				TCP: tcp.Settings{
 					Address: ":2",
 				},
@@ -372,9 +371,9 @@ func Test_Settings_OverrideWith(t *testing.T) {
 			},
 			overidden: Settings{
 				Address:      ":1",
-				LogAddresses: boolPtr(true),
+				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
-				Password:     stringPtr("password"),
+				Password:     ptrTo("password"),
 				TCP: tcp.Settings{
 					Address: ":2",
 				},
