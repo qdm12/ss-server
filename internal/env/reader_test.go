@@ -3,7 +3,7 @@ package env
 import (
 	"testing"
 
-	"github.com/qdm12/ss-server/internal/log"
+	"github.com/qdm12/log"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -131,18 +131,27 @@ func Test_reader_LogLevel(t *testing.T) {
 	t.Parallel()
 
 	testCases := map[string]struct {
-		reader   *Reader
-		logLevel log.Level
+		reader     *Reader
+		logLevel   log.Level
+		errWrapped error
+		errMessage string
 	}{
 		"default": {
 			reader:   &Reader{},
-			logLevel: log.InfoLevel,
+			logLevel: log.LevelInfo,
 		},
-		"set value": {
+		"valid_value": {
 			reader: &Reader{
-				envKV: map[string]string{"LOG_LEVEL": "value"},
+				envKV: map[string]string{"LOG_LEVEL": "warn"},
 			},
-			logLevel: log.Level("value"),
+			logLevel: log.LevelWarn,
+		},
+		"invalid_value": {
+			reader: &Reader{
+				envKV: map[string]string{"LOG_LEVEL": "xxx"},
+			},
+			errWrapped: ErrLogLevelUnknown,
+			errMessage: "log level is unknown: xxx",
 		},
 	}
 
@@ -151,7 +160,12 @@ func Test_reader_LogLevel(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			logLevel := testCase.reader.LogLevel()
+			logLevel, err := testCase.reader.LogLevel()
+
+			assert.ErrorIs(t, err, testCase.errWrapped)
+			if testCase.errWrapped != nil {
+				assert.EqualError(t, err, testCase.errMessage)
+			}
 			assert.Equal(t, testCase.logLevel, logLevel)
 		})
 	}

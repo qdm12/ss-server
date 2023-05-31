@@ -1,9 +1,11 @@
 package env
 
 import (
+	"errors"
+	"fmt"
 	"strings"
 
-	"github.com/qdm12/ss-server/internal/log"
+	"github.com/qdm12/log"
 )
 
 type Reader struct {
@@ -51,13 +53,25 @@ func (r *Reader) Port() (port string) {
 	return port
 }
 
-func (r *Reader) LogLevel() (logLevel log.Level) {
-	logLevel = log.Level(r.envKV["LOG_LEVEL"])
-	if logLevel == "" {
-		const defaultLogLevel = log.InfoLevel
-		logLevel = defaultLogLevel
+var (
+	ErrLogLevelUnknown = errors.New("log level is unknown")
+)
+
+func (r *Reader) LogLevel() (logLevel log.Level, err error) {
+	value := r.envKV["LOG_LEVEL"]
+	if value == "" {
+		return log.LevelInfo, nil
 	}
-	return logLevel
+
+	validLevels := []log.Level{log.LevelDebug, log.LevelInfo,
+		log.LevelWarn, log.LevelError}
+	for _, validLevel := range validLevels {
+		if strings.EqualFold(value, validLevel.String()) {
+			return validLevel, nil
+		}
+	}
+
+	return 0, fmt.Errorf("%w: %s", ErrLogLevelUnknown, value)
 }
 
 func (r *Reader) Profiling() (profiling bool) {

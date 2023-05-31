@@ -2,14 +2,15 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 	_ "time/tzdata"
 
+	"github.com/qdm12/log"
 	"github.com/qdm12/ss-server/internal/env"
-	"github.com/qdm12/ss-server/internal/log"
 	"github.com/qdm12/ss-server/internal/profiling"
 	"github.com/qdm12/ss-server/pkg/tcpudp"
 )
@@ -27,9 +28,8 @@ func main() {
 
 	environ := os.Environ()
 	reader := env.NewReader(environ)
-	logLevel := reader.LogLevel()
 
-	logger := log.New(logLevel, os.Stdout)
+	logger := log.New()
 
 	logger.Info("Running version " + version + " built on " + date + " (" + commit + ")")
 
@@ -66,6 +66,12 @@ func main() {
 }
 
 func _main(ctx context.Context, logger Logger, reader ReaderInterface) error {
+	logLevel, err := reader.LogLevel()
+	if err != nil {
+		return fmt.Errorf("reading log level: %w", err)
+	}
+	logger.Patch(log.SetLevel(logLevel))
+
 	cipherName, password, port, doProfiling :=
 		reader.CipherName(), reader.Password(), reader.Port(), reader.Profiling()
 
@@ -98,12 +104,13 @@ type Logger interface {
 	Debug(s string)
 	Info(s string)
 	Error(s string)
+	log.LoggerPatcher
 }
 
 type ReaderInterface interface {
 	CipherName() (cipherName string)
 	Password() (password string)
 	Port() (port string)
-	LogLevel() (logLevel log.Level)
+	LogLevel() (logLevel log.Level, err error)
 	Profiling() (profiling bool)
 }
