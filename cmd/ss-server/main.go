@@ -24,48 +24,70 @@ var (
 )
 
 func main() {
-	ctx := context.Background()
-	ctx, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
+	buildInfo := BuildInformation{
+		Version: version,
+		Commit:  commit,
+		Date:    date,
+	}
 
-	reader := env.New()
+	background := context.Background()
+	signalCh := make(chan os.Signal, 1)
+	signal.Notify(signalCh, os.Interrupt, syscall.SIGTERM)
+	ctx, cancel := context.WithCancel(background)
 
 	logger := log.New()
-
-	logger.Info("Running version " + version + " built on " + date + " (" + commit + ")")
+	envReader := env.New()
 
 	errorCh := make(chan error)
 	go func() {
-		errorCh <- _main(ctx, logger, reader)
+		errorCh <- _main(ctx, buildInfo, logger, envReader)
 	}()
 
+	var err error
 	select {
-	case <-ctx.Done():
-		logger.Warn("Caught OS signal, shutting down\n")
-		stop()
-	case err := <-errorCh:
+	case signal := <-signalCh:
+		fmt.Println("")
+		logger.Warn("Caught OS signal " + signal.String() + ", shutting down")
+		cancel()
+	case err = <-errorCh:
 		close(errorCh)
 		if err == nil { // expected exit such as healthcheck
 			os.Exit(0)
 		}
 		logger.Error(err.Error())
+		cancel()
 	}
 
 	const shutdownGracePeriod = 5 * time.Second
 	timer := time.NewTimer(shutdownGracePeriod)
 	select {
-	case <-errorCh:
+	case shutdownErr := <-errorCh:
 		if !timer.Stop() {
 			<-timer.C
 		}
+		if shutdownErr != nil {
+			logger.Warnf("Shutdown not completed gracefully: %s", shutdownErr)
+			os.Exit(1)
+		}
+
 		logger.Info("Shutdown successful")
+		if err != nil {
+			os.Exit(1)
+		}
+		os.Exit(0)
 	case <-timer.C:
 		logger.Warn("Shutdown timed out")
+		os.Exit(1)
+	case signal := <-signalCh:
+		logger.Warn("Caught OS signal " + signal.String() + ", forcing shut down")
+		os.Exit(1)
 	}
-
-	os.Exit(1)
 }
 
-func _main(ctx context.Context, logger Logger, settingsSource ReaderInterface) error {
+func _main(ctx context.Context, buildInfo BuildInformation,
+	logger Logger, settingsSource ReaderInterface) error {
+	logger.Info("Running version " + buildInfo.Version + " built on " +
+		buildInfo.Date + " (" + buildInfo.Commit + ")")
 	settings, err := settingsSource.Read()
 	if err != nil {
 		return fmt.Errorf("reading settings: %w", err)
@@ -113,4 +135,10 @@ type Logger interface {
 
 type ReaderInterface interface {
 	Read() (settings settings.Settings, err error)
+}
+
+type BuildInformation struct {
+	Version string
+	Commit  string
+	Date    string
 }
