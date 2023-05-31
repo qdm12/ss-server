@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/qdm12/gosettings v0.3.0-rc9
+	github.com/qdm12/gosplash v0.1.0
 	github.com/qdm12/log v0.1.0
 	github.com/riobard/go-bloom v0.0.0-20200614022211-cdc8013cb5b3
 	github.com/stretchr/testify v1.8.4
