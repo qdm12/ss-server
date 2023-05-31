@@ -69,7 +69,7 @@ The environment variables are:
 | Name | Default | Possible values | Description |
 | --- | --- | --- | --- |
 | `PASSWORD` |  | Any password | Your password |
-| `PORT` | `8388` | `0` or `1024` to `65535` | Internal listening port |
+| `LISTENING_ADDRESS` | `:8388` | Listening address | Internal listening address |
 | `LOG_LEVEL` | `INFO` | `INFO`, `ERROR`, `DEBUG` | Log level |
 | `CIPHER` | `chacha20-ietf-poly1305` | `chacha20-ietf-poly1305`, `aes-128-gcm`, `aes-256-gcm` | Cipher to use |
 | `TZ` |  | Timezone, i.e. `America/Montreal` | Timezone for log times display |

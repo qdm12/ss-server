@@ -15,10 +15,7 @@ func New() *Source {
 func (s *Source) Read() (settings settings.Settings, err error) {
 	settings.CipherName = env.String("CIPHER_NAME")
 	settings.Password = env.Get("PASSWORD", env.ForceLowercase(false))
-	settings.Port, err = env.Uint16Ptr("PORT")
-	if err != nil {
-		return settings, err
-	}
+	settings.Address = env.Get("LISTENING_ADDRESS")
 	settings.LogLevel, err = s.readLogLevel()
 	if err != nil {
 		return settings, err
