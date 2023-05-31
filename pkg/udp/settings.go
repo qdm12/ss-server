@@ -13,8 +13,8 @@ import (
 type Settings struct {
 	// Listening address for the TCP server.
 	// It defaults to ":8388".
-	// It cannot be empty in the internal state.
-	Address string
+	// It cannot be nil in the internal state.
+	Address *string
 	// LogAddresses can be set to true to log
 	// addresses proxied though the TCP server.
 	// It defaults to false.
@@ -33,7 +33,7 @@ type Settings struct {
 // SetDefaults sets default values for all unset field
 // in the settings.
 func (s *Settings) SetDefaults() {
-	s.Address = gosettings.DefaultString(s.Address, ":8388")
+	s.Address = gosettings.DefaultPointer(s.Address, ":8388")
 	s.LogAddresses = gosettings.DefaultPointer(s.LogAddresses, false)
 	s.CipherName = gosettings.DefaultString(s.CipherName, core.Chacha20IetfPoly1305)
 	s.Password = gosettings.DefaultPointer(s.Password, "")
@@ -51,7 +51,7 @@ func (s Settings) Copy() (copied Settings) {
 // MergeWith returns the merge result of the receiver settings with
 // any unset fields set to the field of the other settings argument.
 func (s *Settings) MergeWith(other Settings) (result Settings) {
-	result.Address = gosettings.MergeWithString(s.Address, other.Address)
+	result.Address = gosettings.MergeWithPointer(s.Address, other.Address)
 	result.LogAddresses = gosettings.MergeWithPointer(s.LogAddresses, other.LogAddresses)
 	result.CipherName = gosettings.MergeWithString(s.CipherName, other.CipherName)
 	result.Password = gosettings.MergeWithPointer(s.Password, other.Password)
@@ -61,14 +61,14 @@ func (s *Settings) MergeWith(other Settings) (result Settings) {
 // OverrideWith sets any field of the receiving settings
 // with the field value of any set field from the other settings.
 func (s *Settings) OverrideWith(other Settings) {
-	s.Address = gosettings.OverrideWithString(s.Address, other.Address)
+	s.Address = gosettings.OverrideWithPointer(s.Address, other.Address)
 	s.LogAddresses = gosettings.OverrideWithPointer(s.LogAddresses, other.LogAddresses)
 	s.CipherName = gosettings.OverrideWithString(s.CipherName, other.CipherName)
 	s.Password = gosettings.OverrideWithPointer(s.Password, other.Password)
 }
 
 func (s *Settings) Validate() (err error) {
-	err = address.Validate(s.Address, address.OptionListening(os.Getuid()))
+	err = address.Validate(*s.Address, address.OptionListening(os.Getuid()))
 	if err != nil {
 		return fmt.Errorf("listening address: %w", err)
 	}

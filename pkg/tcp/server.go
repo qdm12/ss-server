@@ -22,7 +22,7 @@ func NewServer(settings Settings, logger Logger) (s *Server, err error) {
 		return nil, err
 	}
 	return &Server{
-		address:      settings.Address,
+		address:      *settings.Address,
 		logAddresses: *settings.LogAddresses,
 		logger:       logger,
 		timeNow:      time.Now,
