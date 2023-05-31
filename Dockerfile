@@ -75,7 +75,7 @@ LABEL \
     org.opencontainers.image.description="Shadowsocks server written in Go, aimed for Docker containers"
 ENV TZ= \
     LOG_LEVEL=INFO \
-    PORT=8388 \
+    LISTENING_ADDRESS=":8388" \
     CIPHER=chacha20-ietf-poly1305
 ENTRYPOINT ["/ss-server"]
 # HEALTHCHECK --interval=10s --timeout=5s --start-period=5s --retries=2 CMD ["/app","healthcheck"]
