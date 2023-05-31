@@ -97,8 +97,9 @@ import (
 func main() {
     logger := &logger{}
     password := "password"
+    address := ":8388"
     settings := tcpudp.Settings{
-        Address:    ":8388",
+        Address:    &address,
         CipherName: "aes-256-gcm",
         Password:   &password,
     }

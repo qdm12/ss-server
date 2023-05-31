@@ -21,7 +21,7 @@ func Test_Settings_SetDefaults(t *testing.T) {
 	}{
 		"empty settings": {
 			expected: Settings{
-				Address:      ":8388",
+				Address:      ptrTo(":8388"),
 				LogAddresses: ptrTo(false),
 				CipherName:   core.Chacha20IetfPoly1305,
 				Password:     ptrTo(""),
@@ -29,13 +29,13 @@ func Test_Settings_SetDefaults(t *testing.T) {
 		},
 		"already set settings": {
 			initial: Settings{
-				Address:      ":0",
+				Address:      ptrTo(":0"),
 				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
 				Password:     ptrTo("password"),
 			},
 			expected: Settings{
-				Address:      ":0",
+				Address:      ptrTo(":0"),
 				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
 				Password:     ptrTo("password"),
@@ -67,13 +67,13 @@ func Test_Settings_Copy(t *testing.T) {
 		"empty settings": {},
 		"non empty settings": {
 			original: Settings{
-				Address:      ":0",
+				Address:      ptrTo(":0"),
 				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
 				Password:     ptrTo("password"),
 			},
 			copied: Settings{
-				Address:      ":0",
+				Address:      ptrTo(":0"),
 				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
 				Password:     ptrTo("password"),
@@ -116,13 +116,13 @@ func Test_Settings_MergeWith(t *testing.T) {
 		"empty settings with empty other": {},
 		"settings with empty other": {
 			original: Settings{
-				Address:      ":0",
+				Address:      ptrTo(":0"),
 				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
 				Password:     ptrTo("password"),
 			},
 			merged: Settings{
-				Address:      ":0",
+				Address:      ptrTo(":0"),
 				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
 				Password:     ptrTo("password"),
@@ -130,19 +130,19 @@ func Test_Settings_MergeWith(t *testing.T) {
 		},
 		"settings with other": {
 			original: Settings{
-				Address:      ":0",
+				Address:      ptrTo(":0"),
 				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
 				Password:     ptrTo("password"),
 			},
 			other: Settings{
-				Address:      ":1",
+				Address:      ptrTo(":1"),
 				LogAddresses: ptrTo(false),
 				CipherName:   core.AES256gcm,
 				Password:     ptrTo("password2"),
 			},
 			merged: Settings{
-				Address:      ":0",
+				Address:      ptrTo(":0"),
 				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
 				Password:     ptrTo("password"),
@@ -150,13 +150,13 @@ func Test_Settings_MergeWith(t *testing.T) {
 		},
 		"empty settings with other": {
 			other: Settings{
-				Address:      ":1",
+				Address:      ptrTo(":1"),
 				LogAddresses: ptrTo(false),
 				CipherName:   core.AES256gcm,
 				Password:     ptrTo("password2"),
 			},
 			merged: Settings{
-				Address:      ":1",
+				Address:      ptrTo(":1"),
 				LogAddresses: ptrTo(false),
 				CipherName:   core.AES256gcm,
 				Password:     ptrTo("password2"),
@@ -190,13 +190,13 @@ func Test_Settings_OverrideWith(t *testing.T) {
 		"empty settings with empty other": {},
 		"settings with empty other": {
 			original: Settings{
-				Address:      ":0",
+				Address:      ptrTo(":0"),
 				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
 				Password:     ptrTo("password"),
 			},
 			overidden: Settings{
-				Address:      ":0",
+				Address:      ptrTo(":0"),
 				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
 				Password:     ptrTo("password"),
@@ -204,19 +204,19 @@ func Test_Settings_OverrideWith(t *testing.T) {
 		},
 		"settings with other": {
 			original: Settings{
-				Address:      ":0",
+				Address:      ptrTo(":0"),
 				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
 				Password:     ptrTo("password"),
 			},
 			other: Settings{
-				Address:      ":1",
+				Address:      ptrTo(":1"),
 				LogAddresses: ptrTo(false),
 				CipherName:   core.AES256gcm,
 				Password:     ptrTo("password2"),
 			},
 			overidden: Settings{
-				Address:      ":1",
+				Address:      ptrTo(":1"),
 				LogAddresses: ptrTo(false),
 				CipherName:   core.AES256gcm,
 				Password:     ptrTo("password2"),
@@ -224,13 +224,13 @@ func Test_Settings_OverrideWith(t *testing.T) {
 		},
 		"empty settings with other": {
 			other: Settings{
-				Address:      ":1",
+				Address:      ptrTo(":1"),
 				LogAddresses: ptrTo(false),
 				CipherName:   core.AES256gcm,
 				Password:     ptrTo("password2"),
 			},
 			overidden: Settings{
-				Address:      ":1",
+				Address:      ptrTo(":1"),
 				LogAddresses: ptrTo(false),
 				CipherName:   core.AES256gcm,
 				Password:     ptrTo("password2"),
@@ -262,21 +262,21 @@ func Test_Settings_Validate(t *testing.T) {
 	}{
 		"invalid address": {
 			settings: Settings{
-				Address: "",
+				Address: ptrTo(""),
 			},
 			errWrapped: address.ErrValueNotValid,
 			errMessage: "listening address: value is not valid: missing port in address",
 		},
 		"invalid port": {
 			settings: Settings{
-				Address: ":100000",
+				Address: ptrTo(":100000"),
 			},
 			errWrapped: port.ErrPortTooHigh,
 			errMessage: "listening address: port cannot be higher than 65535: 100000",
 		},
 		"invalid cipher": {
 			settings: Settings{
-				Address:    ":0",
+				Address:    ptrTo(":0"),
 				CipherName: "garbage",
 			},
 			errWrapped: validate.ErrValueNotOneOf,
@@ -285,7 +285,7 @@ func Test_Settings_Validate(t *testing.T) {
 		},
 		"valid settings": {
 			settings: Settings{
-				Address:    ":0",
+				Address:    ptrTo(":0"),
 				CipherName: core.AES128gcm,
 			},
 		},

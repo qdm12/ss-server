@@ -116,7 +116,7 @@ func _main(ctx context.Context, buildInfo BuildInformation,
 	logger.Patch(log.SetLevel(*settings.LogLevel))
 
 	serverSettings := tcpudp.Settings{
-		Address:    *settings.Address,
+		Address:    settings.Address,
 		CipherName: settings.CipherName,
 		Password:   settings.Password,
 	}
