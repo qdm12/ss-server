@@ -9,6 +9,7 @@ issues:
     - path: _test\.go
       linters:
         - dupl
+        - goerr113
     - text: "variable name 'n' is too short for the scope of its usage"
       linters:
         - varnamelen

@@ -63,37 +63,47 @@ func (s *Server) Listen(ctx context.Context) (err error) {
 		}
 		tcpConnection, ok := connection.(*net.TCPConn)
 		if !ok {
-			s.logger.Error(fmt.Sprintf("connection is not TCP: %s", connection))
+			s.logger.Error(fmt.Sprintf("connection from %s is not TCP: %s",
+				connection.RemoteAddr(), connection))
 			continue
 		}
 		if err := tcpConnection.SetKeepAlive(true); err != nil {
-			s.logger.Error("cannot set keep-alive for TCP connection: " + err.Error())
+			s.logger.Error(fmt.Sprintf("cannot set keep-alive for TCP connection from %s: %s",
+				connection.RemoteAddr(), err))
 			continue
 		}
-		go s.handleConnection(connection)
+		go s.handleConnectionAsync(connection)
 	}
 }
 
-func (s *Server) handleConnection(connection net.Conn) {
-	defer connection.Close()
+func (s *Server) handleConnectionAsync(connection net.Conn) {
+	errs := s.handleConnection(connection)
+	for _, err := range errs {
+		s.logger.Error(fmt.Sprintf("connection from %s: %s", connection.RemoteAddr(), err))
+	}
+}
+
+func (s *Server) handleConnection(connection net.Conn) (errs []error) {
+	defer closeConnection("TCP connection", connection, &errs)
+
 	shadowedConnection := s.shadower.Shadow(connection)
-	defer shadowedConnection.Close()
+	defer closeConnection("shadowed TCP connection", shadowedConnection, &errs)
 
 	targetAddress, err := socks.ReadAddress(shadowedConnection)
 	if err != nil {
-		s.logger.Error("cannot obtain target address: " + err.Error())
+		errs = append(errs, fmt.Errorf("reading target address: %w", err))
 		if _, err := io.Copy(io.Discard, connection); err != nil {
-			s.logger.Error(err.Error())
+			errs = append(errs, fmt.Errorf("discarding connection data: %w", err))
 		}
-		return
+		return errs
 	}
 
 	rightConnection, err := net.Dial("tcp", targetAddress.String())
 	if err != nil {
-		s.logger.Error("cannot connect to target address " + targetAddress.String() + ": " + err.Error())
-		return
+		errs = append(errs, fmt.Errorf("connecting to target address %s: %w", targetAddress, err))
+		return errs
 	}
-	defer rightConnection.Close()
+	defer closeConnection("TCP connection to target address", rightConnection, &errs)
 
 	if s.logAddresses {
 		s.logger.Info("TCP proxying " + connection.RemoteAddr().String() + " to " + targetAddress.String())
@@ -105,6 +115,16 @@ func (s *Server) handleConnection(connection net.Conn) {
 			s.logger.Debug("TCP relay error: " + err.Error())
 			return // ignore i/o timeout
 		}
-		s.logger.Error("TCP relay error: " + err.Error())
+		errs = append(errs, fmt.Errorf("TCP relay error: %w", err))
+	}
+
+	return errs
+}
+
+func closeConnection(name string, conn io.Closer, errs *[]error) {
+	err := conn.Close()
+	if err != nil {
+		err = fmt.Errorf("closing %s: %w", name, err)
+		*errs = append(*errs, err)
 	}
 }

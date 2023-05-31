@@ -35,7 +35,7 @@ func (nm *natmap) Handle(peer net.Addr, dst, src net.PacketConn) {
 	delete(nm.remoteAddressToConnection, key)
 	nm.mu.Unlock()
 	if packetConnection != nil {
-		packetConnection.Close()
+		_ = packetConnection.Close()
 	}
 }
 

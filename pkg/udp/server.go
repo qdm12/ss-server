@@ -60,25 +60,38 @@ func (s *Server) Listen(ctx context.Context) (err error) {
 
 	s.logger.Info("listening UDP on " + packetConnection.LocalAddr().String())
 	for {
-		err = handleIncomingData(packetConnection, buffer,
-			&NATMap, s.logger, s.logAddresses)
+		bytesRead, remoteAddress, err := packetConnection.ReadFrom(buffer)
 		if err != nil {
-			ctxErr := ctx.Err()
-			if ctxErr != nil {
+			if ctxErr := ctx.Err(); ctxErr != nil {
 				return ctxErr
 			}
+
+			err = fmt.Errorf("reading packet: %w", err)
+			if remoteAddress != nil {
+				err = fmt.Errorf("connection from %s: %w", remoteAddress, err)
+			}
+			return err
+		}
+
+		err = handleIncomingData(packetConnection, remoteAddress,
+			buffer, bytesRead, &NATMap, s.logger, s.logAddresses)
+		if err != nil {
+			if ctxErr := ctx.Err(); ctxErr != nil {
+				return ctxErr
+			}
+
+			if remoteAddress != nil {
+				err = fmt.Errorf("connection from %s: %w", remoteAddress, err)
+			}
+
 			s.logger.Error(err.Error())
 		}
 	}
 }
 
-func handleIncomingData(packetConnection net.PacketConn, buffer []byte,
-	natMap *natmap, logger Logger, logAddresses bool) (err error) {
-	bytesRead, remoteAddress, err := packetConnection.ReadFrom(buffer)
-	if err != nil {
-		return fmt.Errorf("reading packet from connection: %w", err)
-	}
-
+func handleIncomingData(packetConnection net.PacketConn, remoteAddress net.Addr,
+	buffer []byte, bytesRead int, natMap *natmap, logger Logger,
+	logAddresses bool) (err error) {
 	targetAddress, err := socks.ExtractAddress(buffer[:bytesRead])
 	if err != nil {
 		return fmt.Errorf("extracting SOCKS target address: %w", err)
