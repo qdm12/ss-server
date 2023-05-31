@@ -8,12 +8,6 @@ import (
 	"time"
 )
 
-var _ Runner = (*ProfileServer)(nil)
-
-type Runner interface {
-	Run(ctx context.Context) error
-}
-
 type ProfileServer struct {
 	httpServer      *http.Server
 	onShutdownError func(err error)

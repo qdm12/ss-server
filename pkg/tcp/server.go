@@ -13,12 +13,6 @@ import (
 	"github.com/qdm12/ss-server/internal/socks"
 )
 
-var _ Listener = (*Server)(nil)
-
-type Listener interface {
-	Listen(ctx context.Context) (err error)
-}
-
 func NewServer(settings Settings, logger Logger) (s *Server, err error) {
 	settings.SetDefaults()
 
@@ -41,7 +35,7 @@ type Server struct {
 	logAddresses bool
 	logger       Logger
 	timeNow      func() time.Time
-	shadower     core.ConnShadower
+	shadower     *core.TCPStreamCipher
 }
 
 // Listen listens for incoming connections.

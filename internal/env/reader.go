@@ -6,16 +6,6 @@ import (
 	"github.com/qdm12/ss-server/internal/log"
 )
 
-var _ ReaderInterface = (*Reader)(nil)
-
-type ReaderInterface interface {
-	CipherName() (cipherName string)
-	Password() (password string)
-	Port() (port string)
-	LogLevel() (logLevel log.Level)
-	Profiling() (profiling bool)
-}
-
 type Reader struct {
 	envKV map[string]string
 }

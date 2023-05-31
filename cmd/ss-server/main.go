@@ -65,7 +65,7 @@ func main() {
 	os.Exit(1)
 }
 
-func _main(ctx context.Context, logger Logger, reader env.ReaderInterface) error {
+func _main(ctx context.Context, logger Logger, reader ReaderInterface) error {
 	cipherName, password, port, doProfiling :=
 		reader.CipherName(), reader.Password(), reader.Port(), reader.Profiling()
 
@@ -98,4 +98,12 @@ type Logger interface {
 	Debug(s string)
 	Info(s string)
 	Error(s string)
+}
+
+type ReaderInterface interface {
+	CipherName() (cipherName string)
+	Password() (password string)
+	Port() (port string)
+	LogLevel() (logLevel log.Level)
+	Profiling() (profiling bool)
 }

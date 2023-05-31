@@ -10,21 +10,6 @@ import (
 	"golang.org/x/crypto/hkdf"
 )
 
-var _ AEADCipher = (*AEADCipherAdapter)(nil)
-
-type AEADCipher interface {
-	SaltSizeGetter
-	Crypter
-}
-
-type SaltSizeGetter interface {
-	GetSaltSize() int
-}
-
-type Crypter interface {
-	Crypt(salt []byte) (cipher.AEAD, error)
-}
-
 type AEADCipherAdapter struct {
 	preSharedKey  []byte
 	newAEADCipher func(key []byte) (cipher.AEAD, error)

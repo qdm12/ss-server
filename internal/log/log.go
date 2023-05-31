@@ -14,15 +14,6 @@ const (
 	ErrorLevel Level = "ERROR"
 )
 
-var _ Logger = (*SimpleLogger)(nil)
-
-type Logger interface {
-	Debug(s string)
-	Info(s string)
-	Warn(s string)
-	Error(s string)
-}
-
 func New(level Level, w io.Writer) *SimpleLogger {
 	flags := log.Ldate | log.Ltime | log.Lshortfile
 	logImpl := log.New(w, "", flags)

@@ -9,16 +9,10 @@ import (
 	"github.com/qdm12/ss-server/pkg/udp"
 )
 
-var _ Listener = (*Server)(nil)
-
-type Listener interface {
-	Listen(ctx context.Context) (err error)
-}
-
 type Server struct {
 	timeNow   func() time.Time
-	tcpServer tcp.Listener
-	udpServer udp.Listener
+	tcpServer *tcp.Server
+	udpServer *udp.Server
 	logger    Logger
 }
 

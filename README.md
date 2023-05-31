@@ -134,51 +134,6 @@ API for the TCP only and UDP only are almost the same, with the difference that 
 
 Have also a look at the [cmd/ss-server/main.go](cmd/ss-server/main.go) which is quite straight forward to understand but uses a bit more complex asynchronous parts.
 
-### Testing
-
-Interfaces are defined such as `github.com/qdm12/ss-server/pkg/tcpudp.Listener`:
-
-```go
-type Listener interface {
-    Listen(ctx context.Context, address string) (err error)
-}
-```
-
-You can generate mocks in your codebase with for example [github.com/golang/mock](github.com/golang/mock) from these interfaces.
-
-[For example](examples/test/main_test.go):
-
-```go
-package main
-
-import (
-    "context"
-    "testing"
-
-    "github.com/golang/mock/gomock"
-)
-
-//go:generate mockgen -destination=mock_tcpudp_listener_test.go -package $GOPACKAGE github.com/qdm12/ss-server/pkg/tcpudp Listener
-
-func Test_Mytest(t *testing.T) {
-    t.Parallel()
-    ctrl := gomock.NewController(t)
-    defer ctrl.Finish() // for Go < 1.14
-
-    ctx := context.Background()
-
-    server := NewMockListener(ctrl)
-    server.EXPECT().Listen(ctx, ":8388").Return(nil)
-
-    err := server.Listen(ctx, ":8388")
-    if err != nil {
-        t.Error("not expecting an error")
-    }
-}
-```
-
-In this example, you can use `go generate ./...` to re-generate the mock from the `Listener` interface.
-
 ## On demand
 
 - SIP003 plugins

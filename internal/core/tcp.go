@@ -1,21 +1,20 @@
-package core //nolint:dupl
+package core
 
 import (
 	"fmt"
 	"net"
 	"strings"
 
-	"github.com/qdm12/ss-server/internal/filter"
 	"github.com/qdm12/ss-server/internal/shadowaead"
 )
 
-func NewTCPStreamCipher(name, password string, saltFilter filter.SaltFilter) (
+func NewTCPStreamCipher(name, password string, saltFilter SaltFilter) (
 	cipher *TCPStreamCipher, err error) {
 	key, err := deriveKey(password, name)
 	if err != nil {
 		return nil, err
 	}
-	var aead shadowaead.AEADCipher
+	var aead *shadowaead.AEADCipherAdapter
 	switch strings.ToLower(name) {
 	case Chacha20IetfPoly1305:
 		aead = shadowaead.Chacha20Poly1305(key)
@@ -30,15 +29,9 @@ func NewTCPStreamCipher(name, password string, saltFilter filter.SaltFilter) (
 	}, nil
 }
 
-var _ ConnShadower = (*TCPStreamCipher)(nil)
-
-type ConnShadower interface {
-	Shadow(connection net.Conn) net.Conn
-}
-
 type TCPStreamCipher struct {
-	aead       shadowaead.AEADCipher
-	saltFilter filter.SaltFilter
+	aead       *shadowaead.AEADCipherAdapter
+	saltFilter SaltFilter
 }
 
 func (c *TCPStreamCipher) Shadow(connection net.Conn) net.Conn {

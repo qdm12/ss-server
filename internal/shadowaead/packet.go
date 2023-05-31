@@ -7,8 +7,6 @@ import (
 	"io"
 	"net"
 	"sync"
-
-	"github.com/qdm12/ss-server/internal/filter"
 )
 
 //nolint:gochecknoglobals
@@ -16,14 +14,14 @@ var zeroNonce [128]byte // read-only zerored array
 
 type cipherPacketConn struct {
 	net.PacketConn
-	aead       AEADCipher
-	saltFilter filter.SaltFilter
+	aead       aeadCipher
+	saltFilter SaltFilter
 	mu         sync.Mutex
 	buffer     []byte // write lock
 }
 
 // NewPacketConn wraps a net.PacketConn with a cipher.
-func NewPacketConn(connection net.PacketConn, aead AEADCipher, saltFilter filter.SaltFilter) net.PacketConn {
+func NewPacketConn(connection net.PacketConn, aead aeadCipher, saltFilter SaltFilter) net.PacketConn {
 	const maxUDPPacketSize = 64 * 1024
 	return &cipherPacketConn{
 		PacketConn: connection,

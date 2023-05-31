@@ -13,14 +13,6 @@ const (
 	saltFilterSlotsNumber       = 10
 )
 
-var _ SaltFilter = (*BloomRing)(nil)
-
-// SaltFilter is used to mitigate replay attacks by detecting repeated salts.
-type SaltFilter interface {
-	AddSalt(b []byte)
-	IsSaltRepeated(b []byte) bool
-}
-
 func NewBloomRing() *BloomRing {
 	bloomRing := &BloomRing{
 		slotCapacity: saltFilterCapacity / saltFilterSlotsNumber,
@@ -44,6 +36,8 @@ func doubleFNV(b []byte) (uint64, uint64) {
 	return x, y
 }
 
+// BloomRing is a salt filter used to mitigate replay
+// attacks by detecting repeated salts.
 type BloomRing struct {
 	slotCapacity int
 	slotPosition int

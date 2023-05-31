@@ -8,8 +8,6 @@ import (
 	"fmt"
 	"io"
 	"net"
-
-	"github.com/qdm12/ss-server/internal/filter"
 )
 
 const payloadSizeMask = 0x3FFF // 16KB - 1 maximum size in bytes of payload
@@ -180,7 +178,7 @@ func increment(b []byte) {
 }
 
 // NewConn wraps a stream net.Conn connection with a cipher.
-func NewConn(connection net.Conn, aead AEADCipher, saltFilter filter.SaltFilter) net.Conn {
+func NewConn(connection net.Conn, aead aeadCipher, saltFilter SaltFilter) net.Conn {
 	return &streamConn{
 		Conn:       connection,
 		aead:       aead,
@@ -190,8 +188,8 @@ func NewConn(connection net.Conn, aead AEADCipher, saltFilter filter.SaltFilter)
 
 type streamConn struct {
 	net.Conn
-	aead       AEADCipher
-	saltFilter filter.SaltFilter
+	aead       aeadCipher
+	saltFilter SaltFilter
 	reader     *reader
 	writer     *writer
 }
