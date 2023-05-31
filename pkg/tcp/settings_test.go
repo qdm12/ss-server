@@ -3,8 +3,10 @@ package tcp
 import (
 	"testing"
 
+	"github.com/qdm12/gosettings/validate"
+	"github.com/qdm12/govalid/address"
+	"github.com/qdm12/govalid/port"
 	"github.com/qdm12/ss-server/internal/core"
-	"github.com/qdm12/ss-server/pkg/validation"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -262,23 +264,24 @@ func Test_Settings_Validate(t *testing.T) {
 			settings: Settings{
 				Address: "",
 			},
-			errWrapped: validation.ErrListenAddressNotValid,
-			errMessage: "listening address is not valid: missing port in address",
+			errWrapped: address.ErrValueNotValid,
+			errMessage: "listening address: value is not valid: missing port in address",
 		},
 		"invalid port": {
 			settings: Settings{
 				Address: ":100000",
 			},
-			errWrapped: validation.ErrListenPortNotValid,
-			errMessage: "listening port is not valid: 100000: must be between 0 and 65535",
+			errWrapped: port.ErrPortTooHigh,
+			errMessage: "listening address: port cannot be higher than 65535: 100000",
 		},
 		"invalid cipher": {
 			settings: Settings{
 				Address:    ":0",
 				CipherName: "garbage",
 			},
-			errWrapped: validation.ErrCipherNotValid,
-			errMessage: "cipher is not valid: garbage",
+			errWrapped: validate.ErrValueNotOneOf,
+			errMessage: "cipher: value is not one of the possible choices: " +
+				"garbage must be one of aes-128-gcm, aes-256-gcm or chacha20-ietf-poly1305",
 		},
 		"valid settings": {
 			settings: Settings{

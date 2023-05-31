@@ -1,8 +1,13 @@
 package udp
 
 import (
+	"fmt"
+	"os"
+
+	"github.com/qdm12/gosettings"
+	"github.com/qdm12/gosettings/validate"
+	"github.com/qdm12/govalid/address"
 	"github.com/qdm12/ss-server/internal/core"
-	"github.com/qdm12/ss-server/pkg/validation"
 )
 
 type Settings struct {
@@ -28,91 +33,49 @@ type Settings struct {
 // SetDefaults sets default values for all unset field
 // in the settings.
 func (s *Settings) SetDefaults() {
-	if s.Address == "" {
-		s.Address = ":8388"
-	}
-
-	if s.LogAddresses == nil {
-		s.LogAddresses = new(bool)
-	}
-
-	if s.CipherName == "" {
-		s.CipherName = core.Chacha20IetfPoly1305
-	}
-
-	if s.Password == nil {
-		s.Password = new(string)
-	}
+	s.Address = gosettings.DefaultString(s.Address, ":8388")
+	s.LogAddresses = gosettings.DefaultPointer(s.LogAddresses, false)
+	s.CipherName = gosettings.DefaultString(s.CipherName, core.Chacha20IetfPoly1305)
+	s.Password = gosettings.DefaultPointer(s.Password, "")
 }
 
 // Copy returns a deep copy of the settings.
 func (s Settings) Copy() (copied Settings) {
 	copied.Address = s.Address
-	if s.LogAddresses != nil {
-		copied.LogAddresses = new(bool)
-		*copied.LogAddresses = *s.LogAddresses
-	}
+	copied.LogAddresses = gosettings.CopyPointer(s.LogAddresses)
 	copied.CipherName = s.CipherName
-	if s.Password != nil {
-		copied.Password = new(string)
-		*copied.Password = *s.Password
-	}
+	copied.Password = gosettings.CopyPointer(s.Password)
 	return copied
 }
 
 // MergeWith sets unset fields of the receiving settings
 // with field values from the other settings.
 func (s *Settings) MergeWith(other Settings) {
-	if s.Address == "" {
-		s.Address = other.Address
-	}
-
-	if s.LogAddresses == nil && other.LogAddresses != nil {
-		s.LogAddresses = new(bool)
-		*s.LogAddresses = *other.LogAddresses
-	}
-
-	if s.CipherName == "" {
-		s.CipherName = other.CipherName
-	}
-
-	if s.Password == nil && other.Password != nil {
-		s.Password = new(string)
-		*s.Password = *other.Password
-	}
+	s.Address = gosettings.MergeWithString(s.Address, other.Address)
+	s.LogAddresses = gosettings.MergeWithPointer(s.LogAddresses, other.LogAddresses)
+	s.CipherName = gosettings.MergeWithString(s.CipherName, other.CipherName)
+	s.Password = gosettings.MergeWithPointer(s.Password, other.Password)
 }
 
 // OverrideWith sets any field of the receiving settings
 // with the field value of any set field from the other settings.
 func (s *Settings) OverrideWith(other Settings) {
-	if other.Address != "" {
-		s.Address = other.Address
-	}
-
-	if other.LogAddresses != nil {
-		s.LogAddresses = new(bool)
-		*s.LogAddresses = *other.LogAddresses
-	}
-
-	if other.CipherName != "" {
-		s.CipherName = other.CipherName
-	}
-
-	if other.Password != nil {
-		s.Password = new(string)
-		*s.Password = *other.Password
-	}
+	s.Address = gosettings.OverrideWithString(s.Address, other.Address)
+	s.LogAddresses = gosettings.OverrideWithPointer(s.LogAddresses, other.LogAddresses)
+	s.CipherName = gosettings.OverrideWithString(s.CipherName, other.CipherName)
+	s.Password = gosettings.OverrideWithPointer(s.Password, other.Password)
 }
 
 func (s *Settings) Validate() (err error) {
-	err = validation.ValidateAddress(s.Address)
+	err = address.Validate(s.Address, address.OptionListening(os.Getuid()))
 	if err != nil {
-		return err
+		return fmt.Errorf("listening address: %w", err)
 	}
 
-	err = validation.ValidateCipher(s.CipherName)
+	err = validate.IsOneOf(s.CipherName,
+		core.AES128gcm, core.AES256gcm, core.Chacha20IetfPoly1305)
 	if err != nil {
-		return err
+		return fmt.Errorf("cipher: %w", err)
 	}
 
 	return nil
