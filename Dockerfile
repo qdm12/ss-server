@@ -5,9 +5,11 @@ ARG ALPINE_VERSION=3.18
 ARG GO_VERSION=1.20
 ARG XCPUTRANSLATE_VERSION=v0.6.0
 ARG GOLANGCI_LINT_VERSION=v1.52.2
+ARG MOCKGEN_VERSION=v1.6.0
 
 FROM --platform=${BUILDPLATFORM} qmcgaw/xcputranslate:${XCPUTRANSLATE_VERSION} AS xcputranslate
 FROM --platform=${BUILDPLATFORM} qmcgaw/binpot:golangci-lint-${GOLANGCI_LINT_VERSION} AS golangci-lint
+FROM --platform=${BUILDPLATFORM} qmcgaw/binpot:mockgen-${MOCKGEN_VERSION} AS mockgen
 
 FROM --platform=${BUILDPLATFORM} golang:${GO_VERSION}-alpine${ALPINE_VERSION} AS base
 ENV CGO_ENABLED=0
@@ -16,6 +18,7 @@ WORKDIR /tmp/gobuild
 RUN apk --update add git g++ findutils
 COPY --from=xcputranslate /xcputranslate /usr/local/bin/xcputranslate
 COPY --from=golangci-lint /bin /go/bin/golangci-lint
+COPY --from=mockgen /bin /go/bin/mockgen
 COPY go.mod go.sum ./
 RUN go mod download
 COPY pkg/ ./pkg/
