@@ -6,6 +6,7 @@ import (
 
 	"github.com/qdm12/gosettings"
 	"github.com/qdm12/gosettings/validate"
+	"github.com/qdm12/gotree"
 	"github.com/qdm12/govalid/address"
 	"github.com/qdm12/log"
 )
@@ -38,4 +39,18 @@ func (s *Settings) Validate() (err error) {
 	}
 
 	return nil
+}
+
+func (s *Settings) ToLinesNode() *gotree.Node {
+	node := gotree.New("Settings summary:")
+	node.Appendf("Listening address: " + *s.Address)
+	node.Appendf("Cipher name: " + s.CipherName)
+	node.Appendf("Password: " + gosettings.ObfuscateKey(*s.Password))
+	node.Appendf("Log level: " + s.LogLevel.String())
+	node.Appendf("Profiling: " + gosettings.BoolToYesNo(s.Profiling))
+	return node
+}
+
+func (s Settings) String() string {
+	return s.ToLinesNode().String()
 }
