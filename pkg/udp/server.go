@@ -76,17 +76,17 @@ func handleIncomingData(packetConnection net.PacketConn, buffer []byte,
 	natMap *natmap, logger Logger, logAddresses bool) (err error) {
 	bytesRead, remoteAddress, err := packetConnection.ReadFrom(buffer)
 	if err != nil {
-		return fmt.Errorf("cannot read from UDP buffer: %w", err)
+		return fmt.Errorf("reading packet from connection: %w", err)
 	}
 
 	targetAddress, err := socks.ExtractAddress(buffer[:bytesRead])
 	if err != nil {
-		return fmt.Errorf("cannot extract target address: %w", err)
+		return fmt.Errorf("extracting SOCKS target address: %w", err)
 	}
 
 	targetUDPAddress, err := net.ResolveUDPAddr("udp", targetAddress.String())
 	if err != nil {
-		return fmt.Errorf("cannot resolve target UDP address: %w", err)
+		return fmt.Errorf("resolving target address: %w", err)
 	}
 
 	payload := buffer[len(targetAddress):bytesRead]
@@ -99,7 +99,7 @@ func handleIncomingData(packetConnection net.PacketConn, buffer []byte,
 
 		connection, err = net.ListenPacket("udp", "")
 		if err != nil {
-			return fmt.Errorf("cannot listen to UDP packet: %w", err)
+			return fmt.Errorf("creating packet listener: %w", err)
 		}
 		natMap.Set(remoteAddress.String(), connection)
 		go natMap.Handle(remoteAddress, packetConnection, connection)
@@ -108,7 +108,7 @@ func handleIncomingData(packetConnection net.PacketConn, buffer []byte,
 	_, err = connection.WriteTo(payload, targetUDPAddress)
 	if err != nil {
 		// accept only UDPAddr despite the signature
-		return fmt.Errorf("cannot write to UDP address %s: %w", targetUDPAddress, err)
+		return fmt.Errorf("writing payload to address %s: %w", targetUDPAddress, err)
 	}
 
 	return nil
