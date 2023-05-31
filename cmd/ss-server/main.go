@@ -9,6 +9,7 @@ import (
 	"time"
 	_ "time/tzdata"
 
+	"github.com/qdm12/gosplash"
 	"github.com/qdm12/log"
 	"github.com/qdm12/ss-server/internal/config/settings"
 	"github.com/qdm12/ss-server/internal/config/sources/env"
@@ -86,8 +87,21 @@ func main() {
 
 func _main(ctx context.Context, buildInfo BuildInformation,
 	logger Logger, settingsSource ReaderInterface) error {
-	logger.Info("Running version " + buildInfo.Version + " built on " +
-		buildInfo.Date + " (" + buildInfo.Commit + ")")
+	splashSettings := gosplash.Settings{
+		User:       "qdm12",
+		Repository: "ss-server",
+		Emails:     []string{"quentin.mcgaw@gmail.com"},
+		Version:    buildInfo.Version,
+		Commit:     buildInfo.Commit,
+		BuildDate:  buildInfo.Date,
+		// Sponsor information
+		PaypalUser:    "qmcgaw",
+		GithubSponsor: "qdm12",
+	}
+	for _, line := range gosplash.MakeLines(splashSettings) {
+		fmt.Println(line)
+	}
+
 	settings, err := settingsSource.Read()
 	if err != nil {
 		return fmt.Errorf("reading settings: %w", err)

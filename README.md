@@ -141,6 +141,5 @@ Have also a look at the [cmd/ss-server/main.go](cmd/ss-server/main.go) which is 
 ## TODOS
 
 - Support hex raw keys instead of passwords
-- Entrypoint message
 - Prometheus stats
 - Docker healthcheck + healthcheck endpoint (i.e. for K8s)
