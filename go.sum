@@ -12,8 +12,8 @@ github.com/mattn/go-isatty v0.0.14 h1:yVuAays6BHfxijgZPzw+3Zlu5yQgKGP2/hcQbHb7S9
 github.com/mattn/go-isatty v0.0.14/go.mod h1:7GGIvUiUoEMVVmxf/4nioHXj79iQHKdU27kJ6hsGG94=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/qdm12/gosettings v0.3.0-rc10 h1:KROVZtFGaMAelV2uyIvIM+jEeylMSz84E5wvRHQQ6p8=
-github.com/qdm12/gosettings v0.3.0-rc10/go.mod h1:+hHzN8lsE63T01t6SruGzc6xkpvfsZFod/ooDs8FWnQ=
+github.com/qdm12/gosettings v0.3.0-rc14 h1:65s1Q3xWhODKOZnaZcwIvlYoAOxGcYgiZj8+NT9n4gE=
+github.com/qdm12/gosettings v0.3.0-rc14/go.mod h1:JRV3opOpHvnKlIA29lKQMdYw1WSMVMfHYLLHPHol5ME=
 github.com/qdm12/gosplash v0.1.0 h1:Sfl+zIjFZFP7b0iqf2l5UkmEY97XBnaKkH3FNY6Gf7g=
 github.com/qdm12/gosplash v0.1.0/go.mod h1:+A3fWW4/rUeDXhY3ieBzwghKdnIPFJgD8K3qQkenJlw=
 github.com/qdm12/gotree v0.2.0 h1:+58ltxkNLUyHtATFereAcOjBVfY6ETqRex8XK90Fb/c=
