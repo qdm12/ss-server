@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/golang/mock v1.6.0
-	github.com/qdm12/gosettings v0.3.0-rc10
+	github.com/qdm12/gosettings v0.4.0-rc1
 	github.com/qdm12/gosplash v0.1.0
 	github.com/qdm12/gotree v0.2.0
 	github.com/qdm12/govalid v0.2.0-rc1
