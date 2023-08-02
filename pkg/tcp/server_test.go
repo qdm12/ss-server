@@ -21,5 +21,5 @@ func Test_closeConnection(t *testing.T) {
 	closeConnection("XYZ", conn, &errs)
 
 	assert.Len(t, errs, 1)
-	assert.EqualError(t, errs[0], "closing XYZ connection: test error")
+	assert.EqualError(t, errs[0], "closing XYZ: test error")
 }
