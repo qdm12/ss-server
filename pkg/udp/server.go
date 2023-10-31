@@ -70,7 +70,8 @@ func (s *Server) Listen(ctx context.Context) (err error) {
 			if remoteAddress != nil {
 				err = fmt.Errorf("connection from %s: %w", remoteAddress, err)
 			}
-			return err
+			s.logger.Error(err.Error())
+			continue
 		}
 
 		err = handleIncomingData(packetConnection, remoteAddress,
