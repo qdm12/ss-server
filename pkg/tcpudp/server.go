@@ -56,14 +56,14 @@ func (s *Server) Listen(ctx context.Context) (err error) {
 
 	select {
 	case err = <-tcpErrorCh:
-		s.logger.Info("TCP server exited")
+		s.logger.Info("TCP server exited: " + err.Error())
 		cancel()
 		close(tcpErrorCh)
 		<-udpErrorCh
 		s.logger.Info("UDP server exited")
 		close(udpErrorCh)
 	case err = <-udpErrorCh:
-		s.logger.Info("UDP server exited")
+		s.logger.Info("UDP server exited: " + err.Error())
 		cancel()
 		close(udpErrorCh)
 		<-tcpErrorCh
