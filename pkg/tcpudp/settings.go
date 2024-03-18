@@ -41,15 +41,17 @@ type Settings struct {
 func (s *Settings) SetDefaults() {
 	s.Address = gosettings.DefaultPointer(s.Address, ":8388")
 	s.LogAddresses = gosettings.DefaultPointer(s.LogAddresses, false)
-	s.CipherName = gosettings.DefaultString(s.CipherName, core.Chacha20IetfPoly1305)
+	s.CipherName = gosettings.DefaultComparable(s.CipherName, core.Chacha20IetfPoly1305)
 	s.Password = gosettings.DefaultPointer(s.Password, "")
 
 	inheritedTCPSettings := s.toTCP()
-	s.TCP = s.TCP.MergeWith(inheritedTCPSettings)
+	inheritedTCPSettings.OverrideWith(s.TCP)
+	s.TCP = inheritedTCPSettings
 	s.TCP.SetDefaults()
 
 	inheritedUDPSettings := s.toUDP()
-	s.UDP = s.UDP.MergeWith(inheritedUDPSettings)
+	inheritedUDPSettings.OverrideWith(s.UDP)
+	s.UDP = inheritedUDPSettings
 	s.UDP.SetDefaults()
 }
 
@@ -80,24 +82,12 @@ func (s Settings) toUDP() (settings udp.Settings) {
 	return settings
 }
 
-// MergeWith returns the merge result of the receiver settings with
-// any unset fields set to the field of the other settings argument.
-func (s *Settings) MergeWith(other Settings) (result Settings) {
-	result.Address = gosettings.MergeWithPointer(s.Address, other.Address)
-	result.LogAddresses = gosettings.MergeWithPointer(s.LogAddresses, other.LogAddresses)
-	result.CipherName = gosettings.MergeWithString(s.CipherName, other.CipherName)
-	result.Password = gosettings.MergeWithPointer(s.Password, other.Password)
-	result.TCP = s.TCP.MergeWith(other.TCP)
-	result.UDP = s.UDP.MergeWith(other.UDP)
-	return result
-}
-
 // OverrideWith sets any field of the receiving settings
 // with the field value of any set field from the other settings.
 func (s *Settings) OverrideWith(other Settings) {
 	s.Address = gosettings.OverrideWithPointer(s.Address, other.Address)
 	s.LogAddresses = gosettings.OverrideWithPointer(s.LogAddresses, other.LogAddresses)
-	s.CipherName = gosettings.OverrideWithString(s.CipherName, other.CipherName)
+	s.CipherName = gosettings.OverrideWithComparable(s.CipherName, other.CipherName)
 	s.Password = gosettings.OverrideWithPointer(s.Password, other.Password)
 	s.TCP.OverrideWith(other.TCP)
 	s.UDP.OverrideWith(other.UDP)

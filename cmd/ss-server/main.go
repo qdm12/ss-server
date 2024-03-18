@@ -9,10 +9,11 @@ import (
 	"time"
 	_ "time/tzdata"
 
+	"github.com/qdm12/gosettings/reader"
+	"github.com/qdm12/gosettings/reader/sources/env"
 	"github.com/qdm12/gosplash"
 	"github.com/qdm12/log"
-	"github.com/qdm12/ss-server/internal/config/settings"
-	"github.com/qdm12/ss-server/internal/config/sources/env"
+	"github.com/qdm12/ss-server/internal/config"
 	"github.com/qdm12/ss-server/internal/profiling"
 	"github.com/qdm12/ss-server/pkg/tcpudp"
 )
@@ -37,11 +38,12 @@ func main() {
 	ctx, cancel := context.WithCancel(background)
 
 	logger := log.New()
-	envReader := env.New()
+	envReader := env.New(env.Settings{})
+	reader := reader.New(reader.Settings{Sources: []reader.Source{envReader}})
 
 	errorCh := make(chan error)
 	go func() {
-		errorCh <- _main(ctx, buildInfo, logger, envReader)
+		errorCh <- _main(ctx, buildInfo, logger, reader)
 	}()
 
 	var err error
@@ -86,7 +88,7 @@ func main() {
 }
 
 func _main(ctx context.Context, buildInfo BuildInformation,
-	logger Logger, settingsSource ReaderInterface) error {
+	logger Logger, configReader *reader.Reader) error {
 	splashSettings := gosplash.Settings{
 		User:       "qdm12",
 		Repository: "ss-server",
@@ -102,7 +104,8 @@ func _main(ctx context.Context, buildInfo BuildInformation,
 		fmt.Println(line)
 	}
 
-	settings, err := settingsSource.Read()
+	var settings config.Settings
+	err := settings.Read(configReader)
 	if err != nil {
 		return fmt.Errorf("reading settings: %w", err)
 	}
@@ -113,7 +116,8 @@ func _main(ctx context.Context, buildInfo BuildInformation,
 		return fmt.Errorf("validating settings: %w", err)
 	}
 
-	logger.Patch(log.SetLevel(*settings.LogLevel))
+	logLevel, _ := log.ParseLevel(settings.LogLevel)
+	logger.Patch(log.SetLevel(logLevel))
 
 	logger.Info(settings.String())
 
@@ -147,10 +151,6 @@ type Logger interface {
 	Info(s string)
 	Error(s string)
 	log.LoggerPatcher
-}
-
-type ReaderInterface interface {
-	Read() (settings settings.Settings, err error)
 }
 
 type BuildInformation struct {
