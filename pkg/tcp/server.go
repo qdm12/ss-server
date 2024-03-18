@@ -113,7 +113,7 @@ func (s *Server) handleConnection(connection net.Conn) (errs []error) {
 		var netErr net.Error
 		if ok := errors.As(err, &netErr); ok && netErr.Timeout() {
 			s.logger.Debug("TCP relay error: " + err.Error())
-			return // ignore i/o timeout
+			return errs // ignore i/o timeout
 		}
 		errs = append(errs, fmt.Errorf("TCP relay error: %w", err))
 	}

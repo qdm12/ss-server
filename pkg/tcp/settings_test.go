@@ -8,6 +8,7 @@ import (
 	"github.com/qdm12/govalid/port"
 	"github.com/qdm12/ss-server/internal/core"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func ptrTo[T any](x T) *T { return &x }
@@ -226,9 +227,9 @@ func Test_Settings_Validate(t *testing.T) {
 
 			err := settings.Validate()
 
-			assert.ErrorIs(t, err, testCase.errWrapped)
+			require.ErrorIs(t, err, testCase.errWrapped)
 			if testCase.errWrapped != nil {
-				assert.EqualError(t, err, testCase.errMessage)
+				require.EqualError(t, err, testCase.errMessage)
 			}
 		})
 	}

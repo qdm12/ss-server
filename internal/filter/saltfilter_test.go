@@ -13,7 +13,7 @@ func Test_NewBloomRing(t *testing.T) {
 	assert.Equal(t, 100000, br.slotCapacity)
 	assert.Equal(t, 10, br.slotCount)
 	assert.Equal(t, 0, br.slotPosition)
-	assert.Equal(t, 10, len(br.slots))
+	assert.Len(t, br.slots, 10)
 }
 
 func Test_BloomRing_AddSalt(t *testing.T) {

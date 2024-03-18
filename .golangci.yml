@@ -46,6 +46,7 @@ linters:
     - gci
     - gochecknoglobals
     - gochecknoinits
+    - gochecksumtype
     - gocognit
     - goconst
     - gocritic
@@ -58,8 +59,10 @@ linters:
     - gomoddirectives
     - goprintffuncname
     - gosec
+    - gosmopolitan
     - grouper
     - importas
+    - inamedparam
     - interfacebloat
     - ireturn
     - lll
@@ -73,14 +76,19 @@ linters:
     - noctx
     - nolintlint
     - nosprintfhostport
+    - perfsprint
     - prealloc
     - predeclared
     - promlinter
+    - protogetter
     - reassign
     - revive
     - rowserrcheck
+    - sloglint
     - sqlclosecheck
+    - tagalign
     - tenv
+    - testifylint
     - thelper
     - tparallel
     - unconvert
@@ -88,6 +96,7 @@ linters:
     - usestdlibvars
     - wastedassign
     - whitespace
+    - zerologlint
 
 run:
   skip-dirs:
