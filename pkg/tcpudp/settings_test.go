@@ -2,7 +2,9 @@ package tcpudp
 
 import (
 	"errors"
+	"net"
 	"testing"
+	"time"
 
 	"github.com/qdm12/gosettings/validate"
 	"github.com/qdm12/ss-server/internal/core"
@@ -32,6 +34,7 @@ func Test_Settings_SetDefaults(t *testing.T) {
 					LogAddresses: ptrTo(false),
 					CipherName:   core.Chacha20IetfPoly1305,
 					Password:     ptrTo(""),
+					Dialer:       &net.Dialer{},
 				},
 				UDP: udp.Settings{
 					Address:      ptrTo(":8388"),
@@ -52,6 +55,7 @@ func Test_Settings_SetDefaults(t *testing.T) {
 					LogAddresses: ptrTo(true),
 					CipherName:   core.Chacha20IetfPoly1305,
 					Password:     ptrTo("tcp"),
+					Dialer:       &net.Dialer{Timeout: time.Second},
 				},
 				UDP: udp.Settings{
 					Address:      ptrTo(":8388"),
@@ -70,6 +74,7 @@ func Test_Settings_SetDefaults(t *testing.T) {
 					LogAddresses: ptrTo(true),
 					CipherName:   core.Chacha20IetfPoly1305,
 					Password:     ptrTo("tcp"),
+					Dialer:       &net.Dialer{Timeout: time.Second},
 				},
 				UDP: udp.Settings{
 					Address:      ptrTo(":8388"),

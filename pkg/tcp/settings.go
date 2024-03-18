@@ -2,6 +2,7 @@ package tcp
 
 import (
 	"fmt"
+	"net"
 	"os"
 
 	"github.com/qdm12/gosettings"
@@ -27,6 +28,9 @@ type Settings struct {
 	// It defaults to the empty string.
 	// It cannot be nil in the internal state.
 	Password *string
+	// Dialer is a custom dialer to use.
+	// It defaults to the empty dialer net.Dialer{}.
+	Dialer *net.Dialer
 }
 
 // SetDefaults sets default values for all unset field
@@ -36,6 +40,7 @@ func (s *Settings) SetDefaults() {
 	s.LogAddresses = gosettings.DefaultPointer(s.LogAddresses, false)
 	s.CipherName = gosettings.DefaultComparable(s.CipherName, core.Chacha20IetfPoly1305)
 	s.Password = gosettings.DefaultPointer(s.Password, "")
+	s.Dialer = gosettings.DefaultPointer(s.Dialer, net.Dialer{})
 }
 
 // Copy returns a deep copy of the settings.
@@ -44,6 +49,7 @@ func (s Settings) Copy() (copied Settings) {
 	copied.LogAddresses = gosettings.CopyPointer(s.LogAddresses)
 	copied.CipherName = s.CipherName
 	copied.Password = gosettings.CopyPointer(s.Password)
+	copied.Dialer = s.Dialer
 	return copied
 }
 
@@ -54,6 +60,7 @@ func (s *Settings) OverrideWith(other Settings) {
 	s.LogAddresses = gosettings.OverrideWithPointer(s.LogAddresses, other.LogAddresses)
 	s.CipherName = gosettings.OverrideWithComparable(s.CipherName, other.CipherName)
 	s.Password = gosettings.OverrideWithPointer(s.Password, other.Password)
+	s.Dialer = gosettings.OverrideWithPointer(s.Dialer, other.Dialer)
 }
 
 func (s *Settings) Validate() (err error) {

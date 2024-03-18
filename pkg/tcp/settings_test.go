@@ -2,7 +2,9 @@ package tcp
 
 import (
 	"errors"
+	"net"
 	"testing"
+	"time"
 
 	"github.com/qdm12/gosettings/validate"
 	"github.com/qdm12/ss-server/internal/core"
@@ -25,6 +27,7 @@ func Test_Settings_SetDefaults(t *testing.T) {
 				LogAddresses: ptrTo(false),
 				CipherName:   core.Chacha20IetfPoly1305,
 				Password:     ptrTo(""),
+				Dialer:       &net.Dialer{},
 			},
 		},
 		"already set settings": {
@@ -33,12 +36,14 @@ func Test_Settings_SetDefaults(t *testing.T) {
 				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
 				Password:     ptrTo("password"),
+				Dialer:       &net.Dialer{Timeout: time.Second},
 			},
 			expected: Settings{
 				Address:      ptrTo(":0"),
 				LogAddresses: ptrTo(true),
 				CipherName:   core.AES128gcm,
 				Password:     ptrTo("password"),
+				Dialer:       &net.Dialer{Timeout: time.Second},
 			},
 		},
 	}
