@@ -6,7 +6,6 @@ import (
 
 	"github.com/qdm12/gosettings"
 	"github.com/qdm12/gosettings/validate"
-	"github.com/qdm12/govalid/address"
 	"github.com/qdm12/ss-server/internal/core"
 	"github.com/qdm12/ss-server/pkg/tcp"
 	"github.com/qdm12/ss-server/pkg/udp"
@@ -95,7 +94,7 @@ func (s *Settings) OverrideWith(other Settings) {
 
 // Validate validates the settings are correct.
 func (s *Settings) Validate() (err error) {
-	err = address.Validate(*s.Address, address.OptionListening(os.Getuid()))
+	err = validate.ListeningAddress(*s.Address, os.Getuid())
 	if err != nil {
 		return fmt.Errorf("listening address: %w", err)
 	}

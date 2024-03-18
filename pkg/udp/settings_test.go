@@ -1,11 +1,10 @@
 package udp
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/qdm12/gosettings/validate"
-	"github.com/qdm12/govalid/address"
-	"github.com/qdm12/govalid/port"
 	"github.com/qdm12/ss-server/internal/core"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -182,6 +181,8 @@ func Test_Settings_OverrideWith(t *testing.T) {
 func Test_Settings_Validate(t *testing.T) {
 	t.Parallel()
 
+	errNothingWrapped := errors.New("")
+
 	testCases := map[string]struct {
 		settings   Settings
 		errWrapped error
@@ -189,16 +190,16 @@ func Test_Settings_Validate(t *testing.T) {
 	}{
 		"invalid address": {
 			settings: Settings{
-				Address: ptrTo(""),
+				Address: ptrTo("x"),
 			},
-			errWrapped: address.ErrValueNotValid,
-			errMessage: "listening address: value is not valid: missing port in address",
+			errWrapped: errNothingWrapped,
+			errMessage: "listening address: splitting host and port: address x: missing port in address",
 		},
 		"invalid port": {
 			settings: Settings{
 				Address: ptrTo(":100000"),
 			},
-			errWrapped: port.ErrPortTooHigh,
+			errWrapped: validate.ErrPortTooHigh,
 			errMessage: "listening address: port cannot be higher than 65535: 100000",
 		},
 		"invalid cipher": {
@@ -227,7 +228,9 @@ func Test_Settings_Validate(t *testing.T) {
 
 			err := settings.Validate()
 
-			require.ErrorIs(t, err, testCase.errWrapped)
+			if !errors.Is(testCase.errWrapped, errNothingWrapped) {
+				require.ErrorIs(t, err, testCase.errWrapped)
+			}
 			if testCase.errWrapped != nil {
 				require.EqualError(t, err, testCase.errMessage)
 			}
