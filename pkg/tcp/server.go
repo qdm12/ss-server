@@ -27,6 +27,7 @@ func NewServer(settings Settings, logger Logger) (s *Server, err error) {
 		logger:       logger,
 		timeNow:      time.Now,
 		shadower:     tcpStreamCipher,
+		dialer:       settings.Dialer,
 	}, nil
 }
 
@@ -36,6 +37,7 @@ type Server struct {
 	logger       Logger
 	timeNow      func() time.Time
 	shadower     *core.TCPStreamCipher
+	dialer       *net.Dialer
 }
 
 // Listen listens for incoming connections.
@@ -98,7 +100,7 @@ func (s *Server) handleConnection(connection net.Conn) (errs []error) {
 		return errs
 	}
 
-	rightConnection, err := net.Dial("tcp", targetAddress.String())
+	rightConnection, err := s.dialer.Dial("tcp", targetAddress.String())
 	if err != nil {
 		errs = append(errs, fmt.Errorf("connecting to target address %s: %w", targetAddress, err))
 		return errs
